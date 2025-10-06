@@ -1,0 +1,84 @@
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    background-color: #ebebeb;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 25px;
+    gap: 15px;
+}
+
+.logo {
+    width: 65px;
+    height: 65px;
+}
+
+.title h1, .title h2 {
+    margin: 0;
+    line-height: 1.1;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #333;
+}
+
+.title h1 {
+    font-size: 20px;
+}
+
+.title h2 {
+    font-size: 18px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+::placeholder {
+  color: #999;
+  opacity: 1; 
+}
+
+.login-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #36a42c;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+    background-color: #2d8a24;
+}
