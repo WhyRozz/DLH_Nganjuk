@@ -284,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <!-- Header -->
     <div class="header">
-        <img src="logo.jpg" alt="Logo Simpelsi" class="header-logo">
+        <img src="\assets\logo.jpg" alt="Logo Simpelsi" class="header-logo">
         <div class="header-title">SIMPELSI</div>
     </div>
 
