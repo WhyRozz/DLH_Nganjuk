@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Header -->
     <div class="header">
         <img src="logo.jpg" alt="Logo Simpelsi" class="header-logo">
-        <div class="header-title">SIMPELSI</div>
+        <div class="header-title">SIMPELSII</div>
     </div>
 
     <!-- Login Card -->
