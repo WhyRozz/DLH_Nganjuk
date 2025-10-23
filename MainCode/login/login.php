@@ -4,10 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Login Admin Simpelsi</title>
-    <!-- Supabase JS SDK (tanpa spasi berlebih!) -->
+    <!-- Supabase JS SDK -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-        // Ganti dengan project URL & anon key Anda yang valid
         window.supabase = createClient(
             'https://dpmsyciwqttdgbbqkmxt.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwbXN5Y2l3cXR0ZGdiYnFrbXh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjgxNTgsImV4cCI6MjA3Njc0NDE1OH0.8fiHzo0ePc8oS27W_BJUKYgoOwkTRlJN08QVHEvUskk'
@@ -52,7 +51,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="/assets/logo.jpg" alt="Logo Simpelsi" class="header-logo">
+        <img src="../assets/logo.jpg" alt="Logo Simpelsi" class="header-logo">
         <div class="header-title">SIMPELSI</div>
     </div>
 
@@ -102,7 +101,7 @@
             btn.style.cursor = 'wait';
 
             try {
-                // Login via Supabase Auth (JavaScript)
+                // Login via Supabase Auth
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
 
@@ -118,18 +117,18 @@
                     throw new Error('Akun ini bukan admin. Akses ditolak.');
                 }
 
-                // Redirect ke dashboard (bisa .php atau .html)
+                // ✅ Redirect ke dashboardAdmin.php (di folder atas)
                 const card = document.querySelector(".login-card");
                 card.style.transition = "transform 0.6s ease, opacity 0.6s ease";
                 card.style.transform = "scale(0.95)";
                 card.style.opacity = "0.8";
                 setTimeout(() => {
-                    window.location.href = "dashboard.php"; // 👈 tetap pakai .php jika dashboard Anda PHP
+                    window.location.href = "../Dashboard/dashboardAdmin.php";
                 }, 600);
 
             } catch (err) {
                 console.error(err);
-                showAlert('❌ ' + (err.message || 'Login gagal.'));
+                showAlert('❌ ' + (err.message || 'Login gagal. Periksa email dan password.'));
                 btn.textContent = 'Login';
                 btn.style.opacity = '1';
                 btn.style.cursor = 'pointer';
