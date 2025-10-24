@@ -324,7 +324,6 @@
     <!-- Navbar -->
     <div class="navbar">
         <div class="nav-logo">
-            <!-- Ganti src dengan URL logo asli kamu -->
             <img src="/assets/logo.jpg" alt="Logo SIMPELSI">
             <span>SIMPELSI</span>
         </div>
@@ -340,7 +339,6 @@
 
     <div class="section" id="home">
         <div class="content" style="display: flex; align-items: center; gap: 40px; flex-wrap: wrap;">
-            <!-- Teks Kiri -->
             <div style="flex: 1; min-width: 300px;">
                 <h1 style="color: #2e8b57; font-size: 28px; margin-bottom: 15px;">Halo, Sahabat SIMPELSI!</h1>
                 <p style="line-height: 1.6; color: #333; margin-bottom: 20px;">
@@ -349,7 +347,6 @@
                 <a href="#" class="btn-green">Mulai</a>
             </div>
 
-            <!-- Ilustrasi Kanan - Bergelombang -->
             <div style="flex: 1; min-width: 300px; text-align: center; position: relative; overflow: hidden;">
                 <img src="/assets/banner.png" alt="Ilustrasi SIMPELSI" style="
                 max-width: 100%;
@@ -365,22 +362,18 @@
     </div>
 
     <!-- Slide 2: Profil & Visi Misi -->
-    <!-- Logo & Gambar Kanan -->
-    <div style="flex: 1; min-width: 300px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <!-- Logo Lingkaran -->
+    <div style="flex: 1; min-width: 300px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 40px;">
         <img src="https://i.imgur.com/2wGzWmK.png" alt="Logo DLH" style="
         max-width: 250px;
         height: auto;
         border-radius: 50%;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    ">
-
-        <!-- Gambar DLH (bukan teks) -->
+        ">
         <img src="https://i.imgur.com/6LpYQ7F.png" alt="DLH Logo" style="
         max-width: 180px;
         height: auto;
         margin-top: 10px;
-    ">
+        ">
     </div>
 
     <!-- Slide 3: Fitur -->
@@ -388,20 +381,17 @@
         <div class="content">
             <h1>FITUR</h1>
             <p>Inovasi Fitur SIMPELSI</p>
-
             <div class="features">
                 <div class="feature-card">
                     <div class="feature-icon">📋</div>
                     <div class="feature-title">LAPOR SAMPAH ILEGAL</div>
                     <p>Bagikan foto sampah ke Aplikasi Simpelsi, dan arahkan letak sampah yang ada di sekitarmu.</p>
                 </div>
-
                 <div class="feature-card">
                     <div class="feature-icon">📍</div>
                     <div class="feature-title">INFORMASI LOKASI TPS</div>
                     <p>Simpelsi memudahkan informasi tempat tertang lokasi TPS Di Kabupaten Negara.</p>
                 </div>
-
                 <div class="feature-card">
                     <div class="feature-icon">📰</div>
                     <div class="feature-title">ARTIKEL EDUKASI</div>
@@ -416,7 +406,6 @@
         <div class="content">
             <h1>JENIS SAMPAH</h1>
             <p>Berbagai jenis sampah yang dapat dilaporkan</p>
-
             <div class="waste-types">
                 <div class="waste-item">
                     <div class="waste-icon">📄</div>
@@ -464,14 +453,12 @@
                 <p>Bersih dari Info. Bersih dari Keluhan. Langkah kecil memberikan dampak besar pada pelestarian lingkungan.</p>
                 <p>©2025 Simpelsi All rights reserved.</p>
             </div>
-
             <div class="footer-col">
                 <h3>Simpelsi</h3>
                 <p><a style="color:white; text-decoration:none;">Home</a></p>
                 <p><a style="color:white; text-decoration:none;">Informasi</a></p>
                 <p><a style="color:white; text-decoration:none;">Layanan</a></p>
             </div>
-
             <div class="footer-col">
                 <h3>Social Media</h3>
                 <div class="social-icons">
@@ -487,9 +474,8 @@
         </div>
     </div>
 
-    <!-- Script JS -->
     <script>
-        // Fungsi scroll ke section
+        // Scroll smooth ke section
         document.querySelectorAll('.nav-menu a').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -500,10 +486,9 @@
             });
         });
 
-        // Fungsi untuk tombol LOGIN
+        // 🔗 Arahkan tombol LOGIN ke halaman login admin
         document.getElementById('loginBtn').addEventListener('click', function() {
-            alert('Fitur login belum tersedia. Silakan hubungi admin.');
-            // window.location.href = 'login.html'; // Uncomment jika ada halaman login
+            window.location.href = 'login/login.php';
         });
     </script>
 </body>
