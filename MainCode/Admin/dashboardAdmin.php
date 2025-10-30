@@ -1,6 +1,10 @@
 <?php
-// Halaman Dashboard Admin - Tampilan Statis
-// Tidak ada logika autentikasi di sini (hanya UI)
+//session_start();
+// 🔒 Proteksi: hanya admin yang sudah login yang boleh akses
+//if (!isset($_SESSION['admin_id'])) {
+//    header("Location: ../login/login.php");
+//    exit;
+//}
 ?>
 
 <!DOCTYPE html>

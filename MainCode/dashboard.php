@@ -331,95 +331,6 @@
             background: #226b42;
         }
 
-        /* Footer (UKURAN PERSIS SEPERTI NAVBAR) */
-        .footer-nav-style {
-            width: 100%;
-            background: #2e8b57;
-            color: white;
-            padding: 12px 30px; /* SAMA PERSIS DENGAN NAVBAR */
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .footer-col {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .footer-col h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .footer-col p {
-            line-height: 1.5;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
-
-        .footer-col p.copyright {
-            font-size: 12px;
-            opacity: 0.9;
-            margin-bottom: 0;
-        }
-
-        .footer-col a {
-            color: white;
-            text-decoration: none;
-            font-size: 13px;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .footer-col a:hover {
-            color: #ffeb3b;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-
-        .social-icons a {
-            color: white;
-            font-size: 18px;
-            text-decoration: none;
-        }
-
-        .subscribe-form {
-            display: flex;
-            gap: 10px;
-            max-width: 300px;
-        }
-
-        .subscribe-form input {
-            padding: 6px 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            flex: 1;
-            font-size: 13px;
-        }
-
-        .subscribe-form button {
-            background: white;
-            color: #2e8b57;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .subscribe-form button:hover {
-            background: #f0f0f0;
-        }
-
         /* Animasi */
         @keyframes waveImage {
             0% {
@@ -452,11 +363,116 @@
             .feature-card {
                 width: 100%;
             }
+        }
 
-            .footer-nav-style {
+        /* === FOOTER BAWAH BARU (SESUAI GAMBAR) === */
+        .footer-bottom {
+            background: #004d26;
+            color: white;
+            padding: 30px 20px;
+            margin-top: 40px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            position: relative;
+            z-index: 5;
+        }
+
+        .footer-bottom.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: space-between;
+        }
+
+        .footer-col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-col h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .footer-col p {
+            line-height: 1.6;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .footer-col .copyright {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 15px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-col ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-col ul li a:hover {
+            color: #ffeb3b;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .social-icons a img {
+            width: 24px;
+            height: 24px;
+            filter: brightness(0) invert(1);
+        }
+
+        @media (max-width: 768px) {
+            .footer-container {
                 flex-direction: column;
-                gap: 15px;
-                padding: 12px 20px;
+                gap: 20px;
+            }
+
+            .footer-col {
+                min-width: 100%;
+            }
+
+            .footer-bottom {
+                padding: 25px 15px;
+            }
+
+            .footer-col h3 {
+                font-size: 16px;
+            }
+
+            .footer-col p {
+                font-size: 13px;
+            }
+
+            .social-icons a img {
+                width: 20px;
+                height: 20px;
             }
         }
     </style>
@@ -535,7 +551,8 @@
                 </div>
             </div>
             <div style="text-align: center; margin-top: 20px; width: 100%;">
-                <a href="#download" class="download-btn" style="padding: 12px 24px; font-size: 16px;">Download APK →</a>
+                <!-- Tombol ini akan scroll ke bagian bawah -->
+                <a href="#main-footer" class="download-btn" style="padding: 12px 24px; font-size: 16px;">Download APK →</a>
             </div>
         </div>
     </div>
@@ -603,7 +620,7 @@
         </div>
     </div>
 
-    <!-- Download + Footer (Footer ukuran navbar, muncul setelah tombol download) -->
+    <!-- Download -->
     <div class="section" id="download">
         <div class="content download-section-content">
             <div class="download-text">
@@ -611,41 +628,43 @@
                 <p>Simpelsi adalah platform yang memudahkan pelaporan sampah ilegal dengan perangkat mobile/smartphone yang bisa diakses online.</p>
                 <a href="#" class="download-btn">DOWNLOAD APK</a>
             </div>
+        </div>
+    </div>
 
-            <!-- FOOTER UKURAN PERSIS NAVBAR -->
-            <div class="footer-nav-style">
-                <div class="footer-col">
-                    <h3>Simpelsi</h3>
-                    <p>
-                        Bersih dari Info. Bersih dari Keluhan. Langkah kecil memberikan dampak besar pada pelestarian lingkungan.
-                    </p>
-                    <p class="copyright">©2025 Simpelsi All rights reserved.</p>
-                </div>
+    <!-- FOOTER BAWAH (DESAIN SESUAI GAMBAR) -->
+    <footer id="main-footer" class="footer-bottom">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>Simpelsi</h3>
+                <p>Berawal dari foto, Berakhir pada Kelestarian. Langkah kecil memberikan dampak besar pada pelestarian lingkungan.</p>
+                <p class="copyright">©2025 Simpelsi All rights reserved.</p>
+            </div>
 
-                <div class="footer-col">
-                    <h3>Menu</h3>
-                    <a href="#home">Beranda</a>
-                    <a href="#profil">Profil</a>
-                    <a href="#fitur">Fitur</a>
-                    <a href="#jenis">Jenis Sampah</a>
-                    <a href="#download">Pengaduan Laporan</a>
-                </div>
+            <div class="footer-col">
+                <h3>Simpelsi</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#profil">Informasi</a></li>
+                    <li><a href="#fitur">Layanan</a></li>
+                </ul>
+            </div>
 
-                <div class="footer-col">
-                    <h3>Social Media</h3>
-                    <div class="social-icons">
-                        <a href="#">📱</a>
-                        <a href="#">📘</a>
-                        <a href="#">🐦</a>
-                    </div>
-                    <div class="subscribe-form">
-                        <input type="email" placeholder="Email Anda">
-                        <button>Send</button>
-                    </div>
+            <div class="footer-col">
+                <h3>Social Media</h3>
+                <div class="social-icons">
+                    <a href="#" aria-label="Instagram">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="24">
+                    </a>
+                    <a href="#" aria-label="Facebook">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="24">
+                    </a>
+                    <a href="#" aria-label="YouTube">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174856.png" alt="YouTube" width="24">
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
+    </footer>
 
     <script>
         // Smooth scroll
@@ -662,6 +681,27 @@
         // Login redirect
         document.getElementById('loginBtn').addEventListener('click', function() {
             window.location.href = 'login/login.php';
+        });
+
+        // Animasi Footer: Muncul saat scroll ke bawah
+        const footer = document.getElementById('main-footer');
+
+        function checkFooterVisibility() {
+            const footerRect = footer.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            if (footerRect.top <= windowHeight * 0.9) {
+                footer.classList.add('visible');
+            }
+        }
+
+        window.addEventListener('scroll', checkFooterVisibility);
+        window.addEventListener('load', checkFooterVisibility);
+
+        // Scroll ke footer saat klik tombol "Download APK" di Visi & Misi
+        document.querySelector('#visimisi .download-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            footer.scrollIntoView({ behavior: 'smooth' });
         });
     </script>
 </body>
