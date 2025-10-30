@@ -1,6 +1,6 @@
 <?php
-// Tidak ada logika login di sini — hanya tampilan
-// Jika ingin cek session, bisa ditambahkan nanti
+// Halaman Dashboard Admin - Tampilan Statis
+// Tidak ada logika autentikasi di sini (hanya UI)
 ?>
 
 <!DOCTYPE html>
@@ -103,7 +103,7 @@
             width: 100%;
             max-width: 1200px;
             padding: 30px;
-            background: #dcedd1; /* hijau muda */
+            background: #e6ffe6;
             border: 2px solid #1a8c1a;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -232,14 +232,14 @@
     <!-- Header -->
     <div class="header">
         <div class="header-left">
-            <img src="assets/logo.jpg" alt="Logo Simpelsi" class="header-logo">
+            <img src="../assets/logo.jpg" alt="Logo Simpelsi" class="header-logo">
             <div>
                 <div class="header-title">Dashboard</div>
                 <div class="header-subtitle">ADMIN</div>
             </div>
         </div>
         <button class="exit-btn" onclick="logout()">
-            <img src="assets/exit-icon.png" alt="Exit" style="width:24px;height:24px;">
+            <img src="../assets/exit-icon.png" alt="Exit" style="width:24px;height:24px;">
             EXIT
         </button>
     </div>
@@ -252,7 +252,7 @@
                 <!-- Fitur 1: Kelola Laporan Aduan -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <img src="assets/clipboard-check.png" alt="Laporan Aduan">
+                        <img src="../assets/clipboard-check.png" alt="Laporan Aduan">
                     </div>
                     <div class="feature-title">Kelola<br>Laporan Aduan</div>
                     <button class="select-btn" onclick="goTo('laporan-aduan')">Pilih</button>
@@ -261,7 +261,7 @@
                 <!-- Fitur 2: Kelola Artikel Edukasi -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <img src="assets/article-edit.png" alt="Artikel Edukasi">
+                        <img src="../assets/article-edit.png" alt="Artikel Edukasi">
                     </div>
                     <div class="feature-title">Kelola<br>Artikel Edukasi</div>
                     <button class="select-btn" onclick="goTo('artikel-edukasi')">Pilih</button>
@@ -270,7 +270,7 @@
                 <!-- Fitur 3: Kelola Informasi TPS -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <img src="assets/recycle-bin.png" alt="Informasi TPS">
+                        <img src="../assets/recycle-bin.png" alt="Informasi TPS">
                     </div>
                     <div class="feature-title">Kelola<br>Informasi TPS</div>
                     <button class="select-btn" onclick="goTo('informasi-tps')">Pilih</button>
@@ -280,34 +280,24 @@
     </div>
 
     <script>
-        // Fungsi logout → kembali ke halaman login
+        // Fungsi logout: kembali ke halaman utama (landing page)
         function logout() {
             if (confirm('Anda yakin ingin keluar?')) {
-                window.location.href = 'login/login.php';
+                window.location.href = '../dashboard.php';
             }
         }
 
-        // Fungsi navigasi ke halaman fitur (contoh)
         function goTo(feature) {
             alert(`Anda memilih: ${feature}`);
-            // Ganti dengan redirect ke halaman nyata
-            // Contoh: window.location.href = `features/${feature}.php`;
+            // Contoh redirect nyata (jika file ada):
+            // window.location.href = `./${feature}.php`;
         }
 
-        // Efek hover pada tombol exit
-        document.querySelector('.exit-btn').addEventListener('mouseenter', () => {
-            document.querySelector('.exit-btn').style.transform = 'scale(1.05)';
-        });
-        document.querySelector('.exit-btn').addEventListener('mouseleave', () => {
-            document.querySelector('.exit-btn').style.transform = 'scale(1)';
-        });
-
-        // Animasi fade-in saat halaman dimuat
+        // Efek fade-in saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
             document.body.style.opacity = '1';
             document.body.style.transition = 'opacity 0.8s ease';
         });
-
         document.body.style.opacity = '0';
     </script>
 </body>
