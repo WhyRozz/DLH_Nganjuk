@@ -28,7 +28,6 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            scroll-snap-align: start;
             background: white;
         }
 
@@ -164,6 +163,11 @@
             font-size: 24px;
         }
 
+        .feature-icon img {
+            width: 40px;
+            height: 40px;
+        }
+
         .feature-title {
             font-size: 16px;
             color: #2e8b57;
@@ -221,72 +225,9 @@
             background: #226b42;
         }
 
-        /* Footer */
-        .footer {
-            background: #2e8b57;
-            color: white;
-            padding: 30px 20px;
-            width: 100%;
-            margin-top: 40px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 30px;
-        }
-
-        .footer-col {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .footer-col h3 {
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .footer-col p {
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .social-icons a {
-            color: white;
-            font-size: 20px;
-            text-decoration: none;
-        }
-
-        .subscribe {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .subscribe input {
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-            flex: 1;
-        }
-
-        .subscribe button {
-            background: white;
-            color: #2e8b57;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
         /* Smooth scroll */
         html {
             scroll-behavior: smooth;
-            scroll-snap-type: y mandatory;
         }
 
         @media (max-width: 768px) {
@@ -331,7 +272,7 @@
         <div class="nav-menu">
             <a href="#home">Beranda</a>
             <a href="#profil">Profil</a>
-            <a href="#fitur">Visi & Misi</a>
+            <a href="#fitur">Fitur</a>
             <a href="#jenis">Jenis Sampah</a>
             <a href="#download">Pengaduan Laporan</a>
         </div>
@@ -346,7 +287,7 @@
                 <p style="line-height: 1.6; color: #333; margin-bottom: 20px;">
                     SIMPELSI adalah Sistem Pelaporan Sampah Ilegal. Ayo, mari kita mulai pelaporan kita lewat laporan ini untuk menghindari dampak buruk terhadap lingkungan. Setiap tindakan kecil akan membuat perbedaan besar dalam menjaga lingkungan.
                 </p>
-                <a href="#" class="btn-green">Mulai</a>
+                <a href="#profil" class="btn-green">Mulai</a>
             </div>
 
             <!-- Ilustrasi Kanan - Bergelombang -->
@@ -364,26 +305,118 @@
         </div>
     </div>
 
-    <!-- Slide 2: Profil & Visi Misi -->
-    <!-- Logo & Gambar Kanan -->
-    <div style="flex: 1; min-width: 300px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <!-- Logo Lingkaran -->
-        <img src="https://i.imgur.com/2wGzWmK.png" alt="Logo DLH" style="
-        max-width: 250px;
-        height: auto;
-        border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    ">
+    <!-- Slide 2: Profil -->
+    <div class="section" id="profil">
+        <div class="content" style="display: flex; align-items: center; gap: 40px; flex-wrap: wrap;">
+            <!-- Teks Kiri -->
+            <div style="flex: 1; min-width: 300px;">
+                <h1 style="color: #2e8b57; font-size: 28px; margin-bottom: 15px;">Profil</h1>
+                <p style="line-height: 1.6; color: #333; margin-bottom: 20px;">
+                    Dinas Lingkungan Hidup merupakan instansi pemerintah yang bertugas membantu kepala daerah dalam melaksanakan urusan pemerintahan di bidang lingkungan hidup yang menjadi kewenangan Daerah dan tugas pembantuan yang diberikan pada Daerah sesuai dengan visi, misi dan program Walikota ekologisasi wilayah dalam Rencana Pembangunan Jangka Menengah Daerah.
+                </p>
+                <a href="#visimisi" class="btn-green" style="padding: 10px 20px; font-size: 14px;">Baca Visi & Misi →</a>
+            </div>
 
-        <!-- Gambar DLH (bukan teks) -->
-        <img src="https://i.imgur.com/6LpYQ7F.png" alt="DLH Logo" style="
-        max-width: 180px;
-        height: auto;
-        margin-top: 10px;
-    ">
+            <!-- Logo Kanan -->
+            <div style="flex: 1; min-width: 300px; text-align: center;">
+                <img src="/assets/logo_dlh.jpg" alt="Logo DLH" style="
+                max-width: 250px;
+                height: auto;
+                border-radius: 50%;
+            ">
+                <div style="margin-top: 15px;">
+                    <img src="/assets/Dlh.png" alt="Logo DLH Kecil" style="
+                    width: 70px;
+                    height: 40px;
+                ">
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Slide 3: Fitur -->
+    <!-- Slide 3: Visi & Misi -->
+    <div class="section" id="visimisi">
+        <div class="content" style="
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        height: 100%;
+        padding: 0px 10px;
+        max-width: 1000px;
+        width: 100%;
+    ">
+            <h1 style="color: #2e8b57; font-size: 28px; text-align: center; margin-bottom: 10px;">Visi & Misi</h1>
+
+            <!-- Kolom Visi & Misi -->
+            <div style="
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            flex: 1;
+        ">
+                <!-- Kolom Visi -->
+                <div style="
+                flex: 1;
+                min-width: 300px;
+                background: #f9f9f9;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+                border-left: 4px solid #2e8b57;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            ">
+                    <div>
+                        <h2 style="color: #2e8b57; font-size: 22px; margin-bottom: 15px;">Visi</h2>
+                        <p style="line-height: 1.6; color: #333;">
+                            Terwujudnya lingkungan hidup yang bersih dan sehat melalui pengelolaan sampah secara terpadu, berkelanjutan, dan partisipatif untuk mewujudkan Kabupaten Negara yang ekologis dan berkelanjutan.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Kolom Misi -->
+                <div style="
+                flex: 1;
+                min-width: 300px;
+                background: #f9f9f9;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+                border-left: 4px solid #2e8b57;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            ">
+                    <div>
+                        <h2 style="color: #2e8b57; font-size: 22px; margin-bottom: 15px;">Misi</h2>
+                        <p style="line-height: 1.6; color: #333;">
+                            1. Meningkatkan kesadaran masyarakat dalam pengelolaan sampah melalui edukasi dan kampanye lingkungan.<br>
+                            2. Memperkuat sistem pengelolaan sampah dari hulu ke hilir secara terintegrasi.<br>
+                            3. Mendorong inovasi teknologi dan partisipasi masyarakat dalam penanganan sampah.<br>
+                            4. Menyediakan layanan pelaporan sampah ilegal yang mudah, cepat, dan transparan.<br>
+                            5. Membangun kerjasama lintas sektor untuk mencapai target pengurangan sampah.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Download APK - Selalu di bawah, tetap terlihat -->
+            <div style="text-align: center; margin-top: 20px; width: 100%;">
+                <a href="#download" class="download-btn" style="
+                padding: 12px 24px;
+                font-size: 16px;
+                display: inline-block;
+            ">Download APK →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Fitur -->
     <div class="section" id="fitur">
         <div class="content">
             <h1>FITUR</h1>
@@ -391,19 +424,19 @@
 
             <div class="features">
                 <div class="feature-card">
-                    <div class="feature-icon">📋</div>
+                    <div class="feature-icon"><img src="/assets/lapor_sampah.png" alt=""></div>
                     <div class="feature-title">LAPOR SAMPAH ILEGAL</div>
                     <p>Bagikan foto sampah ke Aplikasi Simpelsi, dan arahkan letak sampah yang ada di sekitarmu.</p>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">📍</div>
+                    <div class="feature-icon"><img src="/assets/informasi_tps.png" alt=""></div>
                     <div class="feature-title">INFORMASI LOKASI TPS</div>
                     <p>Simpelsi memudahkan informasi tempat tertang lokasi TPS Di Kabupaten Negara.</p>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">📰</div>
+                    <div class="feature-icon"><img src="/assets/artikel_edukasi.png" alt=""></div>
                     <div class="feature-title">ARTIKEL EDUKASI</div>
                     <p>Menemukan pengumpulan sampah EcoSorted terdekat di wilayahmu.</p>
                 </div>
@@ -411,7 +444,7 @@
         </div>
     </div>
 
-    <!-- Slide 4: Jenis Sampah -->
+    <!-- Slide 5: Jenis Sampah -->
     <div class="section" id="jenis">
         <div class="content">
             <h1>JENIS SAMPAH</h1>
@@ -450,38 +483,82 @@
         </div>
     </div>
 
-    <!-- Slide 5: Download APK + Footer -->
-    <div class="section" id="download">
-        <div class="content">
-            <h1>Download Aplikasi</h1>
-            <p>Simpelsi adalah platform yang memudahkan pelaporan sampah ilegal dengan perangkat mobile/smartphone yang bisa diakses online.</p>
-            <a href="#" class="download-btn">DOWNLOAD APK</a>
-        </div>
-
-        <div class="footer">
-            <div class="footer-col">
-                <h3>Simpelsi</h3>
-                <p>Bersih dari Info. Bersih dari Keluhan. Langkah kecil memberikan dampak besar pada pelestarian lingkungan.</p>
-                <p>©2025 Simpelsi All rights reserved.</p>
+    <!-- Slide 6: Download APK + Footer (dalam satu section, tidak ngambang) -->
+    <div class="section" id="download" style="padding: 80px 20px 40px; min-height: auto;">
+        <div class="content" style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 1000px;
+        gap: 40px;
+    ">
+            <!-- Bagian Download -->
+            <div style="text-align: center; max-width: 600px;">
+                <h1>Download Aplikasi</h1>
+                <p>Simpelsi adalah platform yang memudahkan pelaporan sampah ilegal dengan perangkat mobile/smartphone yang bisa diakses online.</p>
+                <a href="#" class="download-btn">DOWNLOAD APK</a>
             </div>
 
-            <div class="footer-col">
-                <h3>Simpelsi</h3>
-                <p><a style="color:white; text-decoration:none;">Home</a></p>
-                <p><a style="color:white; text-decoration:none;">Informasi</a></p>
-                <p><a style="color:white; text-decoration:none;">Layanan</a></p>
-            </div>
-
-            <div class="footer-col">
-                <h3>Social Media</h3>
-                <div class="social-icons">
-                    <a>📱</a>
-                    <a>📘</a>
-                    <a>🐦</a>
+            <!-- Footer (bukan flex item, tapi blok biasa di bawah) -->
+            <div style="
+            width: 100%;
+            background: #2e8b57;
+            color: white;
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+        ">
+                <!-- Kolom Kiri: Simpelsi -->
+                <div style="flex: 1; min-width: 200px;">
+                    <h3 style="font-size: 18px; margin-bottom: 10px;">Simpelsi</h3>
+                    <p style="line-height: 1.5; font-size: 14px; margin-bottom: 10px;">
+                        Bersih dari Info. Bersih dari Keluhan. Langkah kecil memberikan dampak besar pada pelestarian lingkungan.
+                    </p>
+                    <p style="font-size: 12px; opacity: 0.9;">©2025 Simpelsi All rights reserved.</p>
                 </div>
-                <div class="subscribe">
-                    <input type="email" placeholder="Email Anda">
-                    <button>Send</button>
+
+                <!-- Kolom Tengah: Menu -->
+                <div style="flex: 1; min-width: 200px;">
+                    <h3 style="font-size: 18px; margin-bottom: 10px;">Menu</h3>
+                    <p><a href="#home" style="color: white; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px;">Beranda</a></p>
+                    <p><a href="#profil" style="color: white; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px;">Profil</a></p>
+                    <p><a href="#fitur" style="color: white; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px;">Fitur</a></p>
+                    <p><a href="#jenis" style="color: white; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px;">Jenis Sampah</a></p>
+                    <p><a href="#download" style="color: white; text-decoration: none; font-size: 14px; display: block; margin-bottom: 8px;">Pengaduan Laporan</a></p>
+                </div>
+
+                <!-- Kolom Kanan: Social Media & Subscribe -->
+                <div style="flex: 1; min-width: 200px;">
+                    <h3 style="font-size: 18px; margin-bottom: 10px;">Social Media</h3>
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <a href="#" style="color: white; font-size: 20px; text-decoration: none;">📱</a>
+                        <a href="#" style="color: white; font-size: 20px; text-decoration: none;">📘</a>
+                        <a href="#" style="color: white; font-size: 20px; text-decoration: none;">🐦</a>
+                    </div>
+                    <div style="display: flex; gap: 10px; max-width: 300px;">
+                        <input type="email" placeholder="Email Anda" style="
+                        padding: 8px;
+                        border-radius: 5px;
+                        border: none;
+                        flex: 1;
+                        font-size: 14px;
+                    ">
+                        <button style="
+                        background: white;
+                        color: #2e8b57;
+                        border: none;
+                        padding: 8px 15px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: bold;
+                    ">Send</button>
+                    </div>
                 </div>
             </div>
         </div>
