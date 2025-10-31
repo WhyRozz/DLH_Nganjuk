@@ -37,7 +37,7 @@
 
         /* Navbar */
         .navbar {
-            background: #2e8b57;
+            background: linear-gradient(to right, #20A726, #095E0D);
             color: white;
             padding: 12px 30px;
             width: 100%;
@@ -84,17 +84,19 @@
         }
 
         .nav-login {
-            background: #ff6347;
+            background: linear-gradient(to right, #20A726, #095E0D);
             padding: 6px 12px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 14px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            border: 2px solid white;
         }
 
         .nav-login:hover {
-            background: #ff4500;
+            background: linear-gradient(to right, #095E0D, #20A726);
+            transform: scale(1.05);
         }
 
         /* Konten utama */
@@ -105,7 +107,7 @@
         }
 
         h1 {
-            color: #2e8b57;
+            color: #095E0D;
             margin-bottom: 15px;
             font-size: 28px;
         }
@@ -116,8 +118,9 @@
             color: #333;
         }
 
-        .btn-green {
-            background: #2e8b57;
+        .btn-green,
+        .download-btn {
+            background: linear-gradient(to right, #20A726, #095E0D);
             color: white;
             padding: 12px 24px;
             border-radius: 25px;
@@ -125,11 +128,16 @@
             font-weight: bold;
             display: inline-block;
             margin-top: 15px;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 8px rgba(9, 94, 13, 0.3);
         }
 
-        .btn-green:hover {
-            background: #226b42;
+        .btn-green:hover,
+        .download-btn:hover {
+            background: linear-gradient(to right, #095E0D, #20A726);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(9, 94, 13, 0.4);
         }
 
         /* Home Section */
@@ -220,11 +228,11 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #2e8b57;
+            border-left: 4px solid #095E0D;
         }
 
         .visimisi-column h2 {
-            color: #2e8b57;
+            color: #095E0D;
             font-size: 22px;
             margin-bottom: 15px;
         }
@@ -239,19 +247,20 @@
         }
 
         .feature-card {
-            background: #e6f2e6;
+            background: #f0f9f0;
             padding: 20px;
             border-radius: 12px;
             width: 250px;
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-top: 3px solid #20A726;
         }
 
         .feature-icon {
             width: 60px;
             height: 60px;
             margin: 0 auto 15px;
-            background: #2e8b57;
+            background: linear-gradient(to right, #20A726, #095E0D);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -263,11 +272,12 @@
         .feature-icon img {
             width: 40px;
             height: 40px;
+            filter: invert(1);
         }
 
         .feature-title {
             font-size: 16px;
-            color: #2e8b57;
+            color: #095E0D;
             margin-bottom: 10px;
             font-weight: bold;
         }
@@ -281,22 +291,22 @@
         }
 
         .waste-item {
-            background: #f9f9f9;
+            background: #f0f9f0;
             padding: 20px;
             border-radius: 12px;
             text-align: center;
-            border: 1px solid #ddd;
+            border: 1px solid #20A726;
         }
 
         .waste-icon {
             font-size: 32px;
             margin-bottom: 10px;
-            color: #2e8b57;
+            color: #095E0D;
         }
 
         .waste-name {
             font-weight: bold;
-            color: #2e8b57;
+            color: #095E0D;
         }
 
         /* Download Section */
@@ -314,66 +324,15 @@
             max-width: 600px;
         }
 
-        .download-btn {
-            background: #2e8b57;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 18px;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-            transition: background 0.2s;
-        }
-
-        .download-btn:hover {
-            background: #226b42;
-        }
-
-        /* Animasi */
-        @keyframes waveImage {
-            0% {
-                transform: scaleY(1) skewY(0deg);
-            }
-            50% {
-                transform: scaleY(1.03) skewY(3deg);
-            }
-            100% {
-                transform: scaleY(1) skewY(0deg);
-            }
-        }
-
-        /* Smooth scroll */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-menu {
-                gap: 10px;
-                font-size: 12px;
-            }
-
-            .content {
-                padding: 20px;
-            }
-
-            .feature-card {
-                width: 100%;
-            }
-        }
-
-        /* === FOOTER BAWAH BARU (SESUAI GAMBAR) === */
+        /* === FOOTER BAWAH BARU === */
         .footer-bottom {
-            background: #004d26;
+            background: linear-gradient(to right, #095E0D, #053a08);
             color: white;
-            padding: 30px 20px;
+            padding: 40px 20px;
             margin-top: 40px;
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            transform: translateY(40px);
+            transition: opacity 0.9s ease-out, transform 0.9s ease-out;
             position: relative;
             z-index: 5;
         }
@@ -411,7 +370,7 @@
 
         .footer-col .copyright {
             font-size: 12px;
-            opacity: 0.8;
+            opacity: 0.9;
             margin-top: 15px;
         }
 
@@ -433,7 +392,7 @@
         }
 
         .footer-col ul li a:hover {
-            color: #ffeb3b;
+            color: #20A726;
         }
 
         .social-icons {
@@ -459,7 +418,7 @@
             }
 
             .footer-bottom {
-                padding: 25px 15px;
+                padding: 30px 15px;
             }
 
             .footer-col h3 {
@@ -474,6 +433,21 @@
                 width: 20px;
                 height: 20px;
             }
+        }
+
+        /* Animasi */
+        @keyframes waveImage {
+            0% { transform: scaleY(1) skewY(0deg); }
+            50% { transform: scaleY(1.03) skewY(3deg); }
+            100% { transform: scaleY(1) skewY(0deg); }
+        }
+
+        html { scroll-behavior: smooth; }
+
+        @media (max-width: 768px) {
+            .nav-menu { gap: 10px; font-size: 12px; }
+            .content { padding: 20px; }
+            .feature-card { width: 100%; }
         }
     </style>
 </head>
@@ -490,7 +464,7 @@
             <a href="#profil">Profil</a>
             <a href="#fitur">Fitur</a>
             <a href="#jenis">Jenis Sampah</a>
-            <a href="#download">Pengaduan Laporan</a>
+            <a href="#main-footer" id="report-link">Pengaduan Laporan</a>
         </div>
         <div class="nav-login" id="loginBtn">LOGIN</div>
     </div>
@@ -512,21 +486,21 @@
     </div>
 
     <!-- Profil -->
-    <div class="section" id="profil">
-        <div class="content profil-content">
-            <div class="profil-text">
-                <h1>Profil</h1>
-                <p>
-                    Dinas Lingkungan Hidup merupakan instansi pemerintah yang bertugas membantu kepala daerah dalam melaksanakan urusan pemerintahan di bidang lingkungan hidup yang menjadi kewenangan Daerah dan tugas pembantuan yang diberikan pada Daerah sesuai dengan visi, misi dan program Walikota ekologisasi wilayah dalam Rencana Pembangunan Jangka Menengah Daerah.
-                </p>
-                <a href="#visimisi" class="btn-green">Baca Visi & Misi →</a>
-            </div>
-            <div class="profil-logo">
-                <img src="/assets/logo_dlh.jpg" alt="Logo DLH">
-                <img src="/assets/Dlh.png" alt="Logo DLH Kecil">
-            </div>
+<div class="section" id="profil">
+    <div class="content profil-content">
+        <div class="profil-text">
+            <h1>Profil</h1>
+            <p>
+                Dinas Lingkungan Hidup merupakan instansi pemerintah yang bertugas membantu kepala daerah dalam melaksanakan urusan pemerintahan di bidang lingkungan hidup yang menjadi kewenangan Daerah dan tugas pembantuan yang diberikan pada Daerah sesuai dengan visi, misi dan program Walikota ekologisasi wilayah dalam Rencana Pembangunan Jangka Menengah Daerah.
+            </p>
+            <a href="#visimisi" class="btn-green">Baca Visi & Misi →</a>
+        </div>
+        <div class="profil-logo" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <img src="/assets/logo_dlh.jpg" alt="Logo DLH" style="max-width: 250px; height: auto; border-radius: 50%;">
+            <img src="/assets/Dlh.png" alt="Logo DLH Kecil" style="width: 70px; height: 40px;">
         </div>
     </div>
+</div>
 
     <!-- Visi & Misi -->
     <div class="section" id="visimisi">
@@ -551,7 +525,6 @@
                 </div>
             </div>
             <div style="text-align: center; margin-top: 20px; width: 100%;">
-                <!-- Tombol ini akan scroll ke bagian bawah -->
                 <a href="#main-footer" class="download-btn" style="padding: 12px 24px; font-size: 16px;">Download APK →</a>
             </div>
         </div>
@@ -620,18 +593,18 @@
         </div>
     </div>
 
-    <!-- Download -->
-    <div class="section" id="download">
-        <div class="content download-section-content">
-            <div class="download-text">
-                <h1>Download Aplikasi</h1>
-                <p>Simpelsi adalah platform yang memudahkan pelaporan sampah ilegal dengan perangkat mobile/smartphone yang bisa diakses online.</p>
-                <a href="#" class="download-btn">DOWNLOAD APK</a>
-            </div>
-        </div>
+   <!-- Download -->
+<div class="section" id="download" style="min-height: auto; padding: 30px 20px;">
+    <div class="content" style="max-width: 800px; text-align: center;">
+        <h1>Download Aplikasi</h1>
+        <p style="margin: 12px 0 24px;">
+            Simpelsi adalah platform yang memudahkan pelaporan sampah ilegal dengan perangkat mobile/smartphone yang bisa diakses online.
+        </p>
+        <a href="#main-footer" class="download-btn">DOWNLOAD APK</a>
     </div>
+</div>
 
-    <!-- FOOTER BAWAH (DESAIN SESUAI GAMBAR) -->
+    <!-- FOOTER BAWAH -->
     <footer id="main-footer" class="footer-bottom">
         <div class="footer-container">
             <div class="footer-col">
@@ -641,7 +614,7 @@
             </div>
 
             <div class="footer-col">
-                <h3>Simpelsi</h3>
+                <h3>Menu</h3>
                 <ul>
                     <li><a href="#home">Home</a></li>
                     <li><a href="#profil">Informasi</a></li>
@@ -653,13 +626,13 @@
                 <h3>Social Media</h3>
                 <div class="social-icons">
                     <a href="#" aria-label="Instagram">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="24">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png  " alt="Instagram" width="24">
                     </a>
                     <a href="#" aria-label="Facebook">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="24">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png  " alt="Facebook" width="24">
                     </a>
                     <a href="#" aria-label="YouTube">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174856.png" alt="YouTube" width="24">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174856.png  " alt="YouTube" width="24">
                     </a>
                 </div>
             </div>
@@ -667,14 +640,14 @@
     </footer>
 
     <script>
-        // Smooth scroll
-        document.querySelectorAll('.nav-menu a').forEach(anchor => {
+        // Smooth scroll untuk semua link internal
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
-                const targetId = this.getAttribute('href');
-                document.querySelector(targetId).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
 
@@ -683,26 +656,32 @@
             window.location.href = 'login/login.php';
         });
 
-        // Animasi Footer: Muncul saat scroll ke bawah
+        // Animasi footer: muncul saat terlihat di viewport
         const footer = document.getElementById('main-footer');
 
         function checkFooterVisibility() {
-            const footerRect = footer.getBoundingClientRect();
+            const rect = footer.getBoundingClientRect();
             const windowHeight = window.innerHeight;
-
-            if (footerRect.top <= windowHeight * 0.9) {
+            if (rect.top <= windowHeight * 0.9) {
                 footer.classList.add('visible');
             }
+        }
+
+        // Pastikan animasi jalan saat di-scroll ke footer via klik
+        function forceFooterVisible() {
+            setTimeout(() => {
+                footer.classList.add('visible');
+            }, 300);
         }
 
         window.addEventListener('scroll', checkFooterVisibility);
         window.addEventListener('load', checkFooterVisibility);
 
-        // Scroll ke footer saat klik tombol "Download APK" di Visi & Misi
-        document.querySelector('#visimisi .download-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            footer.scrollIntoView({ behavior: 'smooth' });
+        // Saat klik link ke footer → pastikan animasi muncul
+        document.querySelectorAll('a[href="#main-footer"]').forEach(link => {
+            link.addEventListener('click', forceFooterVisible);
         });
+        
     </script>
 </body>
 
