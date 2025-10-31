@@ -75,7 +75,7 @@
             left: 0;
             bottom: 0;
             overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
             z-index: 999;
         }
 
@@ -146,7 +146,7 @@
             background: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             max-width: 800px;
             margin: 0 auto;
         }
@@ -488,6 +488,7 @@
             document.getElementById('uploadPreview').style.display = 'none';
             document.getElementById('hapusBtn').style.display = 'none';
             currentArticle = null;
+            window.location.href = 'kelolaArtikel.php'; // 👈 arahkan ke sini
         }
 
         // Simpan artikel (nanti ganti dengan fetch PUT/POST)
@@ -527,7 +528,7 @@
             document.getElementById('judulInput').value = data.judul || '';
             document.getElementById('tanggalInput').value = data.tanggal || '2025-10-30';
             document.getElementById('deskripsiInput').value = data.deskripsi || '';
-            
+
             if (data.fotoUrl) {
                 const preview = document.getElementById('uploadPreview');
                 const img = document.createElement('img');

@@ -389,7 +389,7 @@
             </div>
         </div>
         <div class="header-exit">
-            <span>←</span> EXIT
+            <a href="/MainCode/dashboard.php"><span>←</span> EXIT</a>
         </div>
     </div>
 
@@ -402,19 +402,19 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="menu-item">
+                <a href="kelolaLaporan.php" class="menu-item">
                     <div class="menu-icon">📋</div>
                     <div>Kelola Laporan Aduan</div>
                 </a>
             </li>
             <li>
-                <a href="#" class="menu-item">
+                <a href="kelolaArtikel.php" class="menu-item">
                     <div class="menu-icon">📝</div>
                     <div>Kelola Artikel Edukasi</div>
                 </a>
             </li>
             <li>
-                <a href="#" class="menu-item">
+                <a href="kelolaTPS.php" class="menu-item">
                     <div class="menu-icon">🗑️</div>
                     <div>Kelola Informasi TPS</div>
                 </a>
