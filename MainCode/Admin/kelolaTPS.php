@@ -337,7 +337,6 @@
         <ul class="sidebar-menu">
             <li>
                 <a href="dashboardAdmin.php" class="menu-item">
-                    <div class="menu-icon">📋</div>
                     <div>Dashboard</div>
                 </a>
             </li>

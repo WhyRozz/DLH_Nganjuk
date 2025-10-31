@@ -314,12 +314,11 @@
         <ul class="sidebar-menu">
             <li>
                 <a href="dashboardAdmin.php" class="menu-item">
-                    <div class="menu-icon">📋</div>
                     <div>Dashboard</div>
                 </a>
             </li>
             <li>
-                <a href="laporan.php" class="menu-item">
+                <a href="kelolaLaporan.php" class="menu-item">
                     <div class="menu-icon">📋</div>
                     <div>Kelola Laporan Aduan</div>
                 </a>

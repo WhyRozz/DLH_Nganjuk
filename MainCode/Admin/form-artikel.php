@@ -391,7 +391,12 @@
     <div class="sidebar">
         <ul class="sidebar-menu">
             <li>
-                <a href="laporan.html" class="menu-item">
+                <a href="dashboardAdmin.php" class="menu-item">
+                    <div>Kelola Laporan Aduan</div>
+                </a>
+            </li>
+            <li>
+                <a href="kelolaLaporan.php" class="menu-item">
                     <div class="menu-icon">📋</div>
                     <div>Kelola Laporan Aduan</div>
                 </a>
@@ -403,7 +408,7 @@
                 </a>
             </li>
             <li>
-                <a href="tps.html" class="menu-item">
+                <a href="kelolaTPS.php" class="menu-item">
                     <div class="menu-icon">🗑️</div>
                     <div>Kelola Informasi TPS</div>
                 </a>

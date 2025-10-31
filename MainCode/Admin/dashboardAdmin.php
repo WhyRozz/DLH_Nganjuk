@@ -525,15 +525,6 @@
             });
         });
 
-        // Sidebar menu active state
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
         // Simulasi hover effect pada bar chart
         document.querySelectorAll('.bar').forEach(bar => {
             bar.addEventListener('mouseenter', function() {

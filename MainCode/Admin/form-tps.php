@@ -374,19 +374,24 @@
     <div class="sidebar">
         <ul class="sidebar-menu">
             <li>
-                <a href="laporan.html" class="menu-item">
+                <a href="dashboardAdmin.php" class="menu-item">
+                    <div>Dashboard</div>
+                </a>
+            </li>
+            <li>
+                <a href="kelolaLaporan.php" class="menu-item">
                     <div class="menu-icon">📋</div>
                     <div>Kelola Laporan Aduan</div>
                 </a>
             </li>
             <li>
-                <a href="artikel.html" class="menu-item">
+                <a href="kelolaArtikel.php" class="menu-item">
                     <div class="menu-icon">📝</div>
                     <div>Kelola Artikel Edukasi</div>
                 </a>
             </li>
             <li>
-                <a href="tps.html" class="menu-item active">
+                <a href="#" class="menu-item active">
                     <div class="menu-icon">🗑️</div>
                     <div>Kelola Informasi TPS</div>
                 </a>
