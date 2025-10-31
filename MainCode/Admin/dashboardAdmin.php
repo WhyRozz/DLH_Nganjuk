@@ -9,300 +9,541 @@
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Dashboard Admin Simpelsi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - SIMPELSI</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
-            min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            transition: background 0.5s ease;
+            min-height: 100vh;
         }
 
-        /* === HEADER === */
+        /* Header */
         .header {
-            background: #1a8c1a;
-            padding: 15px 30px;
+            width: 100%;
+            background: #2e8b57;
+            color: white;
+            padding: 12px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 100;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header-logo {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
-
-        .header-logo:hover {
-            transform: rotate(10deg) scale(1.05);
+            left: 0;
+            z-index: 1000;
         }
 
         .header-title {
-            color: white;
-            font-size: 2em;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .header-subtitle {
-            color: white;
-            font-size: 1.2em;
-            font-weight: normal;
-            margin-top: 5px;
-        }
-
-        .exit-btn {
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             background: white;
-            color: #1a8c1a;
-            border: 2px solid #1a8c1a;
-            padding: 8px 15px;
-            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #2e8b57;
+        }
+
+        .header-exit {
+            background: white;
+            color: #2e8b57;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            gap: 5px;
         }
 
-        .exit-btn:hover {
-            background: #e6ffe6;
-            transform: scale(1.05);
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #e6e6e6;
+            padding: 80px 20px 20px;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 999;
         }
 
-        /* === MAIN CONTENT === */
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .menu-item.active {
+            background: #2e8b57;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .menu-icon {
+            width: 30px;
+            height: 30px;
+            background: #2e8b57;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .menu-item.active .menu-icon {
+            background: white;
+            color: #2e8b57;
+        }
+
+        /* Main Content */
         .main-content {
             flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-            background: #f5f5f5;
-        }
-
-        .dashboard-container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 30px;
-            background: #e6ffe6;
-            border: 2px solid #1a8c1a;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-
-        .section-title {
-            text-align: center;
-            color: #1a8c1a;
-            font-size: 2.5em;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 20px;
-        }
-
-        .feature-card {
+            margin-left: 250px;
+            padding: 80px 30px 30px;
             background: white;
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 300px;
         }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 25px rgba(0,0,0,0.1);
-        }
-
-        .feature-icon {
-            width: 120px;
-            height: 120px;
-            margin: 20px auto;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .feature-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .feature-card:hover .feature-icon {
-            transform: scale(1.1);
-        }
-
-        .feature-title {
-            color: #1a8c1a;
-            font-size: 1.4em;
-            font-weight: bold;
-            margin-bottom: 15px;
-            line-height: 1.3;
-        }
-
-        .feature-desc {
-            color: #333;
-            font-size: 1.1em;
+        .content-header {
             margin-bottom: 20px;
-            line-height: 1.5;
         }
 
-        .select-btn {
-            background: #1a8c1a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 1.1em;
-            font-weight: bold;
+        .content-header h2 {
+            color: #2e8b57;
+            font-size: 24px;
+        }
+
+        /* Statistik Section */
+        .stats-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .stats-header h3 {
+            color: #2e8b57;
+            font-size: 18px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            background: #e6f2e6;
+            border: 1px solid #2e8b57;
+            color: #2e8b57;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
         }
 
-        .select-btn:hover {
-            background: #156b15;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        .filter-btn.active {
+            background: #2e8b57;
+            color: white;
         }
 
-        /* === RESPONSIVE === */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2e8b57;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .trend-chart {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .trend-chart h4 {
+            color: #2e8b57;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .mini-bar-chart {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 80px;
+            gap: 5px;
+        }
+
+        .bar {
+            width: 20px;
+            background: #2e8b57;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2px 0;
+            border-radius: 3px 3px 0 0;
+            transition: height 0.3s ease;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+        }
+
+        .recent-reports {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .recent-reports h4 {
+            color: #2e8b57;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #e6f2e6;
+            font-weight: bold;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-green {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-yellow {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-red {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 80px 15px 20px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                flex-wrap: wrap;
+            }
+
+            .menu-item {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+
+            .stat-number {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                box-shadow: none;
+                border-bottom: 2px solid #2e8b57;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 100px;
+            }
+
             .header {
+                position: static;
+            }
+
+            .stats-header {
                 flex-direction: column;
-                gap: 15px;
-                padding: 15px 20px;
+                align-items: stretch;
+                gap: 10px;
             }
-            .header-title {
-                font-size: 1.8em;
-            }
-            .header-subtitle {
-                font-size: 1em;
-            }
-            .dashboard-container {
-                padding: 20px;
-                margin: 10px;
-            }
-            .section-title {
-                font-size: 2em;
-            }
-            .feature-card {
-                min-height: auto;
-                padding: 20px;
-            }
-            .feature-icon {
-                width: 100px;
-                height: 100px;
+
+            .filter-buttons {
+                flex-wrap: nowrap;
+                overflow-x: auto;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <div class="header">
-        <div class="header-left">
-            <img src="../assets/logo.jpg" alt="Logo Simpelsi" class="header-logo">
+        <div class="header-title">
+            <div class="header-logo">S</div>
             <div>
-                <div class="header-title">Dashboard</div>
-                <div class="header-subtitle">ADMIN</div>
+                <div style="font-size: 18px; font-weight: bold;">Dashboard</div>
+                <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
-        <button class="exit-btn" onclick="logout()">
-            <img src="../assets/exit-icon.png" alt="Exit" style="width:24px;height:24px;">
-            EXIT
-        </button>
+        <div class="header-exit">
+            <span>←</span> EXIT
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="menu-item active">
+                    <div>Dashboard</div>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item">
+                    <div class="menu-icon">📋</div>
+                    <div>Kelola Laporan Aduan</div>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item">
+                    <div class="menu-icon">📝</div>
+                    <div>Kelola Artikel Edukasi</div>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item">
+                    <div class="menu-icon">🗑️</div>
+                    <div>Kelola Informasi TPS</div>
+                </a>
+            </li>
+        </ul>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="dashboard-container">
-            <h1 class="section-title">Fitur</h1>
-            <div class="features-grid">
-                <!-- Fitur 1: Kelola Laporan Aduan -->
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <img src="../assets/clipboard-check.png" alt="Laporan Aduan">
-                    </div>
-                    <div class="feature-title">Kelola<br>Laporan Aduan</div>
-                    <button class="select-btn" onclick="goTo('laporan-aduan')">Pilih</button>
-                </div>
+        <div class="content-header">
+            <h2>Statistik Laporan</h2>
+        </div>
 
-                <!-- Fitur 2: Kelola Artikel Edukasi -->
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <img src="../assets/article-edit.png" alt="Artikel Edukasi">
-                    </div>
-                    <div class="feature-title">Kelola<br>Artikel Edukasi</div>
-                    <button class="select-btn" onclick="goTo('artikel-edukasi')">Pilih</button>
+        <div class="stats-container">
+            <!-- Statistik Header -->
+            <div class="stats-header">
+                <h3>Statistik Laporan</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active">Hari Ini</button>
+                    <button class="filter-btn">Minggu Ini</button>
+                    <button class="filter-btn">Bulan Ini</button>
+                    <button class="filter-btn">Tahun Ini</button>
                 </div>
+            </div>
 
-                <!-- Fitur 3: Kelola Informasi TPS -->
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <img src="../assets/recycle-bin.png" alt="Informasi TPS">
-                    </div>
-                    <div class="feature-title">Kelola<br>Informasi TPS</div>
-                    <button class="select-btn" onclick="goTo('informasi-tps')">Pilih</button>
+            <!-- Statistik Cards -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-number">127</div>
+                    <div class="stat-label">Total Laporan</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-number">89</div>
+                    <div class="stat-label">Selesai Diproses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">38</div>
+                    <div class="stat-label">Belum Diproses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Ditolak</div>
+                </div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="trend-chart">
+                <h4>Trend Laporan (7 Hari Terakhir)</h4>
+                <div class="mini-bar-chart">
+                    <div class="bar" style="height: 30px;">Mon</div>
+                    <div class="bar" style="height: 60px;">Tue</div>
+                    <div class="bar" style="height: 45px;">Wed</div>
+                    <div class="bar" style="height: 80px;">Thu</div>
+                    <div class="bar" style="height: 55px;">Fri</div>
+                    <div class="bar" style="height: 70px;">Sat</div>
+                    <div class="bar" style="height: 40px;">Sun</div>
+                </div>
+            </div>
+
+            <!-- Recent Reports -->
+            <div class="recent-reports">
+                <h4>Laporan Terbaru</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Alamat</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>28 Oct 2025</td>
+                            <td>Jl. Raya Negara</td>
+                            <td><span class="status status-green">Selesai</span></td>
+                        </tr>
+                        <tr>
+                            <td>27 Oct 2025</td>
+                            <td>Jl. Sudirman</td>
+                            <td><span class="status status-yellow">Proses</span></td>
+                        </tr>
+                        <tr>
+                            <td>26 Oct 2025</td>
+                            <td>Jl. Pahlawan</td>
+                            <td><span class="status status-red">Ditolak</span></td>
+                        </tr>
+                        <tr>
+                            <td>25 Oct 2025</td>
+                            <td>Jl. Merdeka</td>
+                            <td><span class="status status-green">Selesai</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        // Fungsi logout: kembali ke halaman utama (landing page)
-        function logout() {
-            if (confirm('Anda yakin ingin keluar?')) {
-                window.location.href = '../dashboard.php';
-            }
-        }
+        // Filter button toggle
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
 
-        function goTo(feature) {
-            alert(`Anda memilih: ${feature}`);
-            // Contoh redirect nyata (jika file ada):
-            // window.location.href = `./${feature}.php`;
-        }
-
-        // Efek fade-in saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            document.body.style.opacity = '1';
-            document.body.style.transition = 'opacity 0.8s ease';
+                // Di sini bisa ditambahkan logika untuk update data statistik berdasarkan filter
+                // Contoh: fetch data dari server berdasarkan periode
+                console.log('Filter:', this.textContent.trim());
+            });
         });
-        document.body.style.opacity = '0';
+
+        // Sidebar menu active state
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Simulasi hover effect pada bar chart
+        document.querySelectorAll('.bar').forEach(bar => {
+            bar.addEventListener('mouseenter', function() {
+                this.style.height = (parseInt(this.style.height) + 10) + 'px';
+            });
+            bar.addEventListener('mouseleave', function() {
+                this.style.height = (parseInt(this.style.height) - 10) + 'px';
+            });
+        });
     </script>
 </body>
+
 </html>
