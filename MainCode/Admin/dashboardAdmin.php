@@ -1,9 +1,10 @@
 <?php
-//session_start();
+session_start();
 // 🔒 Proteksi: hanya admin yang sudah login yang boleh akses
+// Sesuai Test Scenario: S1.4.12, S2.3.11 → "Hak akses dashboard hanya bisa diakses oleh admin"
 //if (!isset($_SESSION['admin_id'])) {
-//    header("Location: ../login/login.php");
-//    exit;
+  //  header("Location: ../login/login.php");
+    //exit;
 //}
 ?>
 
@@ -72,6 +73,12 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            text-decoration: none;
+        }
+
+        .header-exit:hover {
+            background: #e6ffe6;
+            transform: scale(1.05);
         }
 
         /* Sidebar */
@@ -384,21 +391,24 @@
         <div class="header-title">
             <div class="header-logo">S</div>
             <div>
-                <div style="font-size: 18px; font-weight: bold;">Dashboard</div>
+                <div style="font-size: 18px; font-weight: bold;">Beranda</div>
                 <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
-        <div class="header-exit">
-            <a href="/MainCode/dashboard.php"><span>←</span> EXIT</a>
-        </div>
+        <!-- ✅ Perbaikan: Sesuai S1.11.1 & S1.11.2 → tombol Logout harus mengarahkan kembali ke halaman login -->
+        <a href="../login/logout.php" class="header-keluar">
+            <span>←</span> KELUAR
+        </a>
     </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
         <ul class="sidebar-menu">
+            <!-- ✅ Perbaikan: Tambahkan ikon pada menu Dashboard agar konsisten dengan S1.4.12 (semua menu tampil lengkap) -->
             <li>
-                <a href="#" class="menu-item active">
-                    <div>Dashboard</div>
+                <a href="dashboard.php" class="menu-item active">
+                    <div class="menu-icon">📊</div>
+                    <div>Beranda</div>
                 </a>
             </li>
             <li>

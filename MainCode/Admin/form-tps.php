@@ -361,12 +361,12 @@
         <div class="header-title">
             <div class="header-logo">S</div>
             <div>
-                <div style="font-size: 18px; font-weight: bold;">Dashboard</div>
+                <div style="font-size: 18px; font-weight: bold;">Beranda</div>
                 <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
         <div class="header-exit">
-            <span>←</span> EXIT
+            <span>←</span> KELUAR
         </div>
     </div>
 
@@ -375,7 +375,7 @@
         <ul class="sidebar-menu">
             <li>
                 <a href="dashboardAdmin.php" class="menu-item">
-                    <div>Dashboard</div>
+                    <div>Beranda</div>
                 </a>
             </li>
             <li>
