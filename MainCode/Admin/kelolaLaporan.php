@@ -1,5 +1,5 @@
 <?php
-// --- KONEKSI DATABASE ---
+// ---- KONEKSI DATABASE ----
 $host = 'fdb1034.awardspace.net';
 $db   = '4698762_simpelsi';
 $user = '4698762_simpelsi';
