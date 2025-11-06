@@ -1,3 +1,30 @@
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Sertakan koneksi database
+require_once '../KoneksiDatabase/koneksi.php';
+
+// Ambil semua laporan dengan JOIN ke tabel masyarakat
+$stmt = $pdo->query("
+    SELECT 
+        l.id,
+        l.id_masyarakat,
+        l.nama AS nama_pelapor,
+        m.email AS email_pelapor,
+        l.lokasi,
+        l.keterangan,
+        l.status,
+        l.foto,
+        l.created_at,
+        l.tanggal
+    FROM laporan l
+    LEFT JOIN masyarakat m ON l.id_masyarakat = m.id_masyarakat
+    ORDER BY l.id DESC
+");
+$laporanList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -75,7 +102,7 @@
             left: 0;
             bottom: 0;
             overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
             z-index: 999;
         }
 
@@ -146,7 +173,7 @@
             background: white;
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -176,7 +203,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             overflow-x: auto;
         }
 
@@ -185,7 +212,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
@@ -205,9 +233,20 @@
             display: inline-block;
         }
 
-        .status-proses { background: #fff3cd; color: #856404; }
-        .status-selesai { background: #d4edda; color: #155724; }
-        .status-ditolak { background: #f8d7da; color: #721c24; }
+        .status-proses {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-selesai {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-ditolak {
+            background: #f8d7da;
+            color: #721c24;
+        }
 
         /* Detail Row (hidden by default) */
         .detail-row {
@@ -397,7 +436,8 @@
                 padding: 10px;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 8px;
                 font-size: 12px;
             }
@@ -424,7 +464,7 @@
                 <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
-        <div class="header-exit">
+        <div class="header-exit" onclick="window.location.href='../Admin/login.php'">
             <span>←</span> EXIT
         </div>
     </div>
@@ -482,245 +522,83 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Baris 1 -->
-                    <tr onclick="toggleDetail(1)">
-                        <td>1</td>
-                        <td>Siti</td>
-                        <td>siti@gmail.com</td>
-                        <td><span class="status-badge status-proses">PROSES</span></td>
-                    </tr>
-                    <tr class="detail-row" id="detail-1">
-                        <td colspan="4">
-                            <div class="detail-content">
-                                <div class="detail-image">
-                                    <img src="https://via.placeholder.com/300x200?text=FOTO+SAMPAH" alt="Foto Sampah">
-                                </div>
-                                <div class="detail-form">
-                                    <div class="form-group">
-                                        <label class="form-label">Nama:</label>
-                                        <input type="text" class="form-input" value="Siti" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Email:</label>
-                                        <input type="email" class="form-input" value="siti@gmail.com" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Lokasi:</label>
-                                        <input type="text" class="form-input" value="Jl. Raya Negara, Kec. Banyuwangi" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Tanggal:</label>
-                                        <input type="text" class="form-input" value="28-10-2025" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Keterangan:</label>
-                                        <textarea class="form-textarea" readonly>Sampah sudah penuh belum diambil, mohon untuk mengambil sampah tersebut.</textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Status:</label>
-                                        <div class="status-options">
-                                            <div class="status-option">
-                                                <input type="radio" id="status-proses-1" name="status-1" value="PROSES" checked>
-                                                <label for="status-proses-1">Proses</label>
+                    <?php if (empty($laporanList)): ?>
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 20px;">Tidak ada laporan.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($laporanList as $laporan):
+                            $id = $laporan['id'];
+                            $statusClass = match (strtolower($laporan['status'])) {
+                                'diproses' => 'status-proses',
+                                'diterima' => 'status-selesai',
+                                'ditolak' => 'status-ditolak',
+                                default => 'status-proses'
+                            };
+                            $statusLabel = strtoupper($laporan['status']);
+                            $fotoPath = !empty($laporan['foto']) 
+                                ? htmlspecialchars($laporan['foto']) 
+                                : 'https://via.placeholder.com/300x200?text=Foto+Tidak+Ada';
+                            $tanggal = $laporan['tanggal'] 
+                                ? date('d-m-Y', strtotime($laporan['tanggal'])) 
+                                : '-';
+                        ?>
+                            <tr onclick="toggleDetail(<?= $id ?>)">
+                                <td><?= htmlspecialchars($id) ?></td>
+                                <td><?= htmlspecialchars($laporan['nama_pelapor'] ?? '-') ?></td>
+                                <td><?= htmlspecialchars($laporan['email_pelapor'] ?? 'N/A') ?></td>
+                                <td><span class="status-badge <?= $statusClass ?>"><?= $statusLabel ?></span></td>
+                            </tr>
+                            <tr class="detail-row" id="detail-<?= $id ?>">
+                                <td colspan="4">
+                                    <div class="detail-content">
+                                        <div class="detail-image">
+                                            <img src="<?= $fotoPath ?>" alt="Foto Sampah">
+                                        </div>
+                                        <div class="detail-form">
+                                            <div class="form-group">
+                                                <label class="form-label">Nama:</label>
+                                                <input type="text" class="form-input" value="<?= htmlspecialchars($laporan['nama_pelapor'] ?? '') ?>" readonly>
                                             </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-selesai-1" name="status-1" value="SELESAI">
-                                                <label for="status-selesai-1">Selesai</label>
+                                            <div class="form-group">
+                                                <label class="form-label">Email:</label>
+                                                <input type="email" class="form-input" value="<?= htmlspecialchars($laporan['email_pelapor'] ?? '') ?>" readonly>
                                             </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-ditolak-1" name="status-1" value="DITOLAK">
-                                                <label for="status-ditolak-1">Ditolak</label>
+                                            <div class="form-group">
+                                                <label class="form-label">Lokasi:</label>
+                                                <input type="text" class="form-input" value="<?= htmlspecialchars($laporan['lokasi'] ?? '') ?>" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Tanggal:</label>
+                                                <input type="text" class="form-input" value="<?= $tanggal ?>" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Keterangan:</label>
+                                                <textarea class="form-textarea" readonly><?= htmlspecialchars($laporan['keterangan'] ?? '') ?></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Status:</label>
+                                                <div class="status-options">
+                                                    <?php foreach (['Diproses', 'Diterima', 'Ditolak'] as $opt):
+                                                        $checked = ($laporan['status'] === $opt) ? 'checked' : '';
+                                                    ?>
+                                                        <div class="status-option">
+                                                            <input type="radio" id="status-<?= $opt ?>-<?= $id ?>" name="status-<?= $id ?>" value="<?= $opt ?>" <?= $checked ?>>
+                                                            <label for="status-<?= $opt ?>-<?= $id ?>"><?= $opt ?></label>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button class="btn-secondary" onclick="closeDetail(<?= $id ?>)">KEMBALI</button>
+                                                <button class="btn-primary" onclick="saveStatus(<?= $id ?>)">SIMPAN</button>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="btn-group">
-                                        <button class="btn-secondary" onclick="closeDetail(1)">KEMBALI</button>
-                                        <button class="btn-primary" onclick="saveStatus(1)">SIMPAAN</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Baris 2 -->
-                    <tr onclick="toggleDetail(2)">
-                        <td>2</td>
-                        <td>Akbar</td>
-                        <td>akbar@gmail.com</td>
-                        <td><span class="status-badge status-proses">PROSES</span></td>
-                    </tr>
-                    <tr class="detail-row" id="detail-2">
-                        <td colspan="4">
-                            <div class="detail-content">
-                                <div class="detail-image">
-                                    <img src="https://via.placeholder.com/300x200?text=FOTO+SAMPAH" alt="Foto Sampah">
-                                </div>
-                                <div class="detail-form">
-                                    <div class="form-group">
-                                        <label class="form-label">Nama:</label>
-                                        <input type="text" class="form-input" value="Akbar" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Email:</label>
-                                        <input type="email" class="form-input" value="akbar@gmail.com" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Lokasi:</label>
-                                        <input type="text" class="form-input" value="Jl. Sudirman, Kec. Banyuwangi" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Tanggal:</label>
-                                        <input type="text" class="form-input" value="27-10-2025" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Keterangan:</label>
-                                        <textarea class="form-textarea" readonly>Sampah plastik menumpah di pinggir jalan, mohon segera ditangani.</textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Status:</label>
-                                        <div class="status-options">
-                                            <div class="status-option">
-                                                <input type="radio" id="status-proses-2" name="status-2" value="PROSES" checked>
-                                                <label for="status-proses-2">Proses</label>
-                                            </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-selesai-2" name="status-2" value="SELESAI">
-                                                <label for="status-selesai-2">Selesai</label>
-                                            </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-ditolak-2" name="status-2" value="DITOLAK">
-                                                <label for="status-ditolak-2">Ditolak</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="btn-group">
-                                        <button class="btn-secondary" onclick="closeDetail(2)">KEMBALI</button>
-                                        <button class="btn-primary" onclick="saveStatus(2)">SIMPAAN</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Baris 3 -->
-                    <tr onclick="toggleDetail(3)">
-                        <td>3</td>
-                        <td>Lutfan</td>
-                        <td>lutfan@gmail.com</td>
-                        <td><span class="status-badge status-selesai">SELESAI</span></td>
-                    </tr>
-                    <tr class="detail-row" id="detail-3">
-                        <td colspan="4">
-                            <div class="detail-content">
-                                <div class="detail-image">
-                                    <img src="https://via.placeholder.com/300x200?text=FOTO+SAMPAH" alt="Foto Sampah">
-                                </div>
-                                <div class="detail-form">
-                                    <div class="form-group">
-                                        <label class="form-label">Nama:</label>
-                                        <input type="text" class="form-input" value="Lutfan" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Email:</label>
-                                        <input type="email" class="form-input" value="lutfan@gmail.com" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Lokasi:</label>
-                                        <input type="text" class="form-input" value="Jl. Pahlawan, Kec. Banyuwangi" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Tanggal:</label>
-                                        <input type="text" class="form-input" value="26-10-2025" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Keterangan:</label>
-                                        <textarea class="form-textarea" readonly>Sampah organik menumpah di dekat sekolah, sudah diangkat oleh petugas.</textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Status:</label>
-                                        <div class="status-options">
-                                            <div class="status-option">
-                                                <input type="radio" id="status-proses-3" name="status-3" value="PROSES">
-                                                <label for="status-proses-3">Proses</label>
-                                            </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-selesai-3" name="status-3" value="SELESAI" checked>
-                                                <label for="status-selesai-3">Selesai</label>
-                                            </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-ditolak-3" name="status-3" value="DITOLAK">
-                                                <label for="status-ditolak-3">Ditolak</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="btn-group">
-                                        <button class="btn-secondary" onclick="closeDetail(3)">KEMBALI</button>
-                                        <button class="btn-primary" onclick="saveStatus(3)">SIMPAAN</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Baris 4 -->
-                    <tr onclick="toggleDetail(4)">
-                        <td>4</td>
-                        <td>Ratih</td>
-                        <td>ratih@gmail.com</td>
-                        <td><span class="status-badge status-ditolak">DITOLAK</span></td>
-                    </tr>
-                    <tr class="detail-row" id="detail-4">
-                        <td colspan="4">
-                            <div class="detail-content">
-                                <div class="detail-image">
-                                    <img src="https://via.placeholder.com/300x200?text=FOTO+SAMPAH" alt="Foto Sampah">
-                                </div>
-                                <div class="detail-form">
-                                    <div class="form-group">
-                                        <label class="form-label">Nama:</label>
-                                        <input type="text" class="form-input" value="Ratih" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Email:</label>
-                                        <input type="email" class="form-input" value="ratih@gmail.com" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Lokasi:</label>
-                                        <input type="text" class="form-input" value="Jl. Merdeka, Kec. Banyuwangi" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Tanggal:</label>
-                                        <input type="text" class="form-input" value="25-10-2025" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Keterangan:</label>
-                                        <textarea class="form-textarea" readonly>Foto tidak jelas, lokasi tidak spesifik. Mohon dilengkapi.</textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Status:</label>
-                                        <div class="status-options">
-                                            <div class="status-option">
-                                                <input type="radio" id="status-proses-4" name="status-4" value="PROSES">
-                                                <label for="status-proses-4">Proses</label>
-                                            </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-selesai-4" name="status-4" value="SELESAI">
-                                                <label for="status-selesai-4">Selesai</label>
-                                            </div>
-                                            <div class="status-option">
-                                                <input type="radio" id="status-ditolak-4" name="status-4" value="DITOLAK" checked>
-                                                <label for="status-ditolak-4">Ditolak</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="btn-group">
-                                        <button class="btn-secondary" onclick="closeDetail(4)">KEMBALI</button>
-                                        <button class="btn-primary" onclick="saveStatus(4)">SIMPAAN</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -749,42 +627,63 @@
             detailRow.classList.remove('active');
         }
 
-        // Save status
+        // Save status to database
         function saveStatus(id) {
             const selectedStatus = document.querySelector(`input[name="status-${id}"]:checked`).value;
-            const statusBadge = document.querySelector(`#detail-${id} .status-badge`);
-            
-            // Update badge
-            statusBadge.textContent = selectedStatus;
-            statusBadge.className = `status-badge status-${selectedStatus.toLowerCase()}`;
-            
-            // Update row status (optional)
-            const row = document.querySelector(`tr:nth-child(${id + 1})`);
-            const statusCell = row.cells[3];
-            statusCell.innerHTML = `<span class="status-badge status-${selectedStatus.toLowerCase()}">${selectedStatus}</span>`;
-            
-            alert(`Status laporan ID ${id} berhasil diubah menjadi ${selectedStatus}`);
-            
-            // Close detail after save
-            closeDetail(id);
+
+            fetch('update_status.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${encodeURIComponent(id)}&status=${encodeURIComponent(selectedStatus)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge in detail
+                    const badge = document.querySelector(`#detail-${id} .status-badge`);
+                    badge.textContent = selectedStatus.toUpperCase();
+                    badge.className = `status-badge status-${selectedStatus.toLowerCase()}`;
+                    
+                    // Update badge in main row
+                    const row = document.querySelector(`tr[onclick*="toggleDetail(${id})"] td:last-child`);
+                    row.innerHTML = `<span class="status-badge status-${selectedStatus.toLowerCase()}">${selectedStatus.toUpperCase()}</span>`;
+                    
+                    alert(`Status laporan ID ${id} berhasil diubah!`);
+                    closeDetail(id);
+                } else {
+                    alert('Gagal menyimpan: ' + (data.message || 'Error tidak dikenal'));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan saat menyimpan.');
+            });
         }
 
-        // Search functionality (dummy)
+        // Search functionality (client-side only)
         document.querySelector('.search-btn').addEventListener('click', function() {
             const query = document.querySelector('.search-input').value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
+            const rows = document.querySelectorAll('tbody tr:not(.detail-row)');
             rows.forEach(row => {
                 const name = row.cells[1].textContent.toLowerCase();
                 const email = row.cells[2].textContent.toLowerCase();
                 if (name.includes(query) || email.includes(query)) {
                     row.style.display = '';
+                    // Show detail if already open
+                    const detailRow = row.nextElementSibling;
+                    if (detailRow && detailRow.classList.contains('detail-row')) {
+                        detailRow.style.display = detailRow.classList.contains('active') ? 'table-row' : 'none';
+                    }
                 } else {
                     row.style.display = 'none';
+                    const detailRow = row.nextElementSibling;
+                    if (detailRow && detailRow.classList.contains('detail-row')) {
+                        detailRow.style.display = 'none';
+                    }
                 }
             });
         });
 
-        // Enter key search
         document.querySelector('.search-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 document.querySelector('.search-btn').click();
