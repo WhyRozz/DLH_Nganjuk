@@ -1,11 +1,114 @@
 <?php
 session_start();
-// 🔒 Proteksi: hanya admin yang sudah login yang boleh akses
-// Sesuai Test Scenario: S1.4.12, S2.3.11 → "Hak akses dashboard hanya bisa diakses oleh admin"
-//if (!isset($_SESSION['admin_id'])) {
-  //  header("Location: ../login/login.php");
-    //exit;
-//}
+
+// Proteksi: hanya admin yang sudah login
+// if (!isset($_SESSION['admin_id'])) {
+//     header("Location: ../login/login.php");
+//     exit;
+// }
+
+// Load koneksi database
+require_once '../KoneksiDatabase/koneksi.php';
+
+// Daftar nama bulan
+$bulan_list = [
+    1 => 'Januari',
+    2 => 'Februari',
+    3 => 'Maret',
+    4 => 'April',
+    5 => 'Mei',
+    6 => 'Juni',
+    7 => 'Juli',
+    8 => 'Agustus',
+    9 => 'September',
+    10 => 'Oktober',
+    11 => 'November',
+    12 => 'Desember'
+];
+
+// Ambil input filter
+$selected_tahun = $_GET['tahun'] ?? date('Y');
+$selected_bulan = $_GET['bulan'] ?? date('n');
+
+// Validasi input
+$selected_tahun = (int)$selected_tahun;
+$selected_bulan = (int)$selected_bulan;
+
+if ($selected_bulan < 1 || $selected_bulan > 12) $selected_bulan = (int)date('n');
+if ($selected_tahun < 2000 || $selected_tahun > (int)date('Y') + 1) $selected_tahun = (int)date('Y');
+
+// Buat WHERE clause berdasarkan tahun & bulan
+$where = "WHERE (
+    (tanggal IS NOT NULL AND YEAR(tanggal) = $selected_tahun AND MONTH(tanggal) = $selected_bulan)
+    OR
+    (tanggal IS NULL AND YEAR(created_at) = $selected_tahun AND MONTH(created_at) = $selected_bulan)
+)";
+
+// Ambil total laporan
+$stmt = $pdo->query("SELECT COUNT(*) FROM laporan $where");
+$total = $stmt->fetchColumn();
+
+// Ambil jumlah per status
+$stmt = $pdo->prepare("SELECT status, COUNT(*) as total FROM laporan $where GROUP BY status");
+$stmt->execute();
+$status_counts = [];
+while ($row = $stmt->fetch()) {
+    $status_counts[$row['status']] = $row['total'];
+}
+
+$diproses = $status_counts['Diproses'] ?? 0;
+$diterima = $status_counts['Diterima'] ?? 0;
+$ditolak = $status_counts['Ditolak'] ?? 0;
+
+$belum_diproses = $diproses;
+$selesai_diproses = $diterima;
+
+// === PERBAIKAN: GANTI 7 QUERY JADI 1 QUERY ===
+$dates_range = [];
+$date_labels = [];
+
+for ($i = 6; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+    $dates_range[] = $date;
+    $date_labels[] = date('D', strtotime($date));
+}
+
+$placeholders = str_repeat('?,', count($dates_range) - 1) . '?';
+$stmt = $pdo->prepare("
+    SELECT DATE(COALESCE(tanggal, created_at)) as report_date, COUNT(*) as total
+    FROM laporan
+    WHERE DATE(COALESCE(tanggal, created_at)) IN ($placeholders)
+    GROUP BY report_date
+");
+$stmt->execute($dates_range);
+
+$result_map = [];
+while ($row = $stmt->fetch()) {
+    $result_map[$row['report_date']] = (int)$row['total'];
+}
+
+$counts = [];
+foreach ($dates_range as $date) {
+    $counts[] = $result_map[$date] ?? 0;
+}
+$dates = $date_labels;
+// === AKHIR PERBAIKAN ===
+
+// Laporan terbaru (4 terakhir)
+$stmt = $pdo->query("
+    SELECT lokasi AS alamat, status, created_at 
+    FROM laporan 
+    ORDER BY created_at DESC 
+    LIMIT 4
+");
+$recent_reports = $stmt->fetchAll();
+
+// Ambil daftar tahun unik dari database untuk dropdown
+$stmt = $pdo->query("SELECT DISTINCT YEAR(COALESCE(tanggal, created_at)) as tahun FROM laporan ORDER BY tahun DESC");
+$tahun_options = $stmt->fetchAll(PDO::FETCH_COLUMN);
+if (empty($tahun_options)) {
+    $tahun_options = [date('Y')];
+}
 ?>
 
 <!DOCTYPE html>
@@ -27,6 +130,16 @@ session_start();
             background: #f5f5f5;
             display: flex;
             min-height: 100vh;
+        }
+
+        /* Fade-in saat halaman load */
+        body.fade-in .main-content {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        body.fade-in-ready .main-content {
+            opacity: 1;
         }
 
         /* Header */
@@ -85,47 +198,57 @@ session_start();
         .sidebar {
             width: 250px;
             background: #e6e6e6;
-            padding: 80px 20px 20px;
             position: fixed;
             top: 60px;
             left: 0;
             bottom: 0;
+            padding: 20px 0;
             overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
             z-index: 999;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-menu {
             list-style: none;
+            padding: 0 20px;
+            margin: 0;
+            flex: 1;
         }
 
         .menu-item {
-            padding: 15px 20px;
-            margin-bottom: 10px;
+            padding: 14px 20px;
+            margin-bottom: 8px;
             background: white;
             border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
             color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .menu-item:hover {
             background: #f0f0f0;
+            transform: translateX(4px);
         }
 
         .menu-item.active {
             background: #2e8b57;
             color: white;
-            border: 2px solid white;
+            border: none;
+            box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
         }
 
         .menu-icon {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             background: #2e8b57;
             color: white;
             border-radius: 50%;
@@ -133,6 +256,7 @@ session_start();
             align-items: center;
             justify-content: center;
             font-size: 16px;
+            flex-shrink: 0;
         }
 
         .menu-item.active .menu-icon {
@@ -140,14 +264,22 @@ session_start();
             color: #2e8b57;
         }
 
-        /* Main Content */
+        /* Main Content dengan animasi fade */
         .main-content {
             flex: 1;
             margin-left: 250px;
-            padding: 80px 30px 30px;
-            background: white;
+            padding: 80px 30px 40px;
+            background: #f9f9f9;
+            min-height: 100vh;
+            opacity: 1;
+            transition: opacity 0.25s ease-in-out;
         }
 
+        .main-content.fade-out {
+            opacity: 0;
+        }
+
+        /* Sisa CSS tetap sama... */
         .content-header {
             margin-bottom: 20px;
         }
@@ -157,7 +289,6 @@ session_start();
             font-size: 24px;
         }
 
-        /* Statistik Section */
         .stats-container {
             background: white;
             padding: 20px;
@@ -180,25 +311,48 @@ session_start();
             font-size: 18px;
         }
 
-        .filter-buttons {
+        .filter-controls {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
-        .filter-btn {
-            background: #e6f2e6;
-            border: 1px solid #2e8b57;
-            color: #2e8b57;
-            padding: 6px 12px;
-            border-radius: 20px;
+        .filter-controls label {
             font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
+            color: #2e8b57;
+            margin-bottom: 2px;
         }
 
-        .filter-btn.active {
+        .filter-controls select,
+        .filter-controls button,
+        .filter-controls a {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-controls button {
             background: #2e8b57;
             color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .filter-controls button:hover {
+            background: #226b43;
+        }
+
+        .filter-controls a {
+            background: #e6e6e6;
+            color: #333;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .filter-controls a:hover {
+            background: #ddd;
         }
 
         .stats-cards {
@@ -250,26 +404,49 @@ session_start();
             display: flex;
             justify-content: space-around;
             align-items: flex-end;
-            height: 80px;
+            height: 110px;
             gap: 5px;
         }
 
+        .bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+            font-size: 10px;
+            color: #666;
+            width: 14.28%;
+        }
+
+        .bar-value {
+            font-weight: bold;
+            color: #2e8b57;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .bar-label {
+            margin-top: 5px;
+            white-space: nowrap;
+            font-size: 11px;
+        }
+
         .bar {
-            width: 20px;
+            width: 24px;
             background: #2e8b57;
             color: white;
-            font-size: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            padding: 2px 0;
             border-radius: 3px 3px 0 0;
-            transition: height 0.3s ease;
+            transition: all 0.2s;
+            font-size: 10px;
         }
 
         .bar:hover {
-            opacity: 0.8;
+            background: #226b43;
+            transform: scaleY(1.05);
         }
 
         .recent-reports {
@@ -339,17 +516,9 @@ session_start();
                 grid-template-columns: 1fr;
             }
 
-            .filter-buttons {
-                flex-wrap: wrap;
-            }
-
-            .menu-item {
-                padding: 12px 15px;
-                font-size: 13px;
-            }
-
-            .stat-number {
-                font-size: 20px;
+            .filter-controls {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
 
@@ -376,16 +545,11 @@ session_start();
                 align-items: stretch;
                 gap: 10px;
             }
-
-            .filter-buttons {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-            }
         }
     </style>
 </head>
 
-<body>
+<body class="fade-in">
     <!-- Header -->
     <div class="header">
         <div class="header-title">
@@ -395,8 +559,7 @@ session_start();
                 <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
-        <!-- ✅ Perbaikan: Sesuai S1.11.1 & S1.11.2 → tombol Logout harus mengarahkan kembali ke halaman login -->
-        <a href="../login/logout.php" class="header-keluar">
+        <a href="../dashboard.php" class="header-exit">
             <span>←</span> KELUAR
         </a>
     </div>
@@ -404,9 +567,8 @@ session_start();
     <!-- Sidebar -->
     <div class="sidebar">
         <ul class="sidebar-menu">
-            <!-- ✅ Perbaikan: Tambahkan ikon pada menu Dashboard agar konsisten dengan S1.4.12 (semua menu tampil lengkap) -->
             <li>
-                <a href="dashboard.php" class="menu-item active">
+                <a href="dashboardAdmin.php" class="menu-item active">
                     <div class="menu-icon">📊</div>
                     <div>Beranda</div>
                 </a>
@@ -433,58 +595,78 @@ session_start();
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content" id="mainContent">
         <div class="content-header">
             <h2>Statistik Laporan</h2>
         </div>
 
         <div class="stats-container">
-            <!-- Statistik Header -->
             <div class="stats-header">
-                <h3>Statistik Laporan</h3>
-                <div class="filter-buttons">
-                    <button class="filter-btn active">Hari Ini</button>
-                    <button class="filter-btn">Minggu Ini</button>
-                    <button class="filter-btn">Bulan Ini</button>
-                    <button class="filter-btn">Tahun Ini</button>
+                <h3>Statistik Laporan – <?= htmlspecialchars($bulan_list[$selected_bulan]) ?> <?= $selected_tahun ?></h3>
+                <div class="filter-controls">
+                    <form method="GET" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <label for="tahun">Tahun:</label>
+                            <select name="tahun" id="tahun">
+                                <?php foreach ($tahun_options as $thn): ?>
+                                    <option value="<?= $thn ?>" <?= $thn == $selected_tahun ? 'selected' : '' ?>><?= $thn ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="bulan">Bulan:</label>
+                            <select name="bulan" id="bulan">
+                                <?php foreach ($bulan_list as $num => $nama): ?>
+                                    <option value="<?= $num ?>" <?= $num == $selected_bulan ? 'selected' : '' ?>><?= $nama ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="submit">Tampilkan</button>
+                        <a href="dashboardAdmin.php">Reset</a>
+                    </form>
                 </div>
             </div>
 
-            <!-- Statistik Cards -->
             <div class="stats-cards">
                 <div class="stat-card">
-                    <div class="stat-number">127</div>
+                    <div class="stat-number"><?= $total ?></div>
                     <div class="stat-label">Total Laporan</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">89</div>
+                    <div class="stat-number"><?= $selesai_diproses ?></div>
                     <div class="stat-label">Selesai Diproses</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">38</div>
+                    <div class="stat-number"><?= $belum_diproses ?></div>
                     <div class="stat-label">Belum Diproses</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">5</div>
+                    <div class="stat-number"><?= $ditolak ?></div>
                     <div class="stat-label">Ditolak</div>
                 </div>
             </div>
 
-            <!-- Trend Chart -->
             <div class="trend-chart">
                 <h4>Trend Laporan (7 Hari Terakhir)</h4>
                 <div class="mini-bar-chart">
-                    <div class="bar" style="height: 30px;">Mon</div>
-                    <div class="bar" style="height: 60px;">Tue</div>
-                    <div class="bar" style="height: 45px;">Wed</div>
-                    <div class="bar" style="height: 80px;">Thu</div>
-                    <div class="bar" style="height: 55px;">Fri</div>
-                    <div class="bar" style="height: 70px;">Sat</div>
-                    <div class="bar" style="height: 40px;">Sun</div>
+                    <?php
+                    $max_count = max($counts) ?: 1;
+                    ?>
+                    <?php foreach ($dates as $i => $day_abbr):
+                        $full_date = date('Y-m-d', strtotime("-" . (6 - $i) . " days"));
+                        $count = $counts[$i];
+                        $height = ($count / $max_count) * 80;
+                        if ($height < 10) $height = 10;
+                    ?>
+                        <div class="bar-container">
+                            <div class="bar-value"><?= $count ?></div>
+                            <div class="bar" style="height: <?= $height ?>px;"></div>
+                            <div class="bar-label"><?= date('d M', strtotime($full_date)) ?></div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
-            <!-- Recent Reports -->
             <div class="recent-reports">
                 <h4>Laporan Terbaru</h4>
                 <table>
@@ -496,52 +678,85 @@ session_start();
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>28 Oct 2025</td>
-                            <td>Jl. Raya Negara</td>
-                            <td><span class="status status-green">Selesai</span></td>
-                        </tr>
-                        <tr>
-                            <td>27 Oct 2025</td>
-                            <td>Jl. Sudirman</td>
-                            <td><span class="status status-yellow">Proses</span></td>
-                        </tr>
-                        <tr>
-                            <td>26 Oct 2025</td>
-                            <td>Jl. Pahlawan</td>
-                            <td><span class="status status-red">Ditolak</span></td>
-                        </tr>
-                        <tr>
-                            <td>25 Oct 2025</td>
-                            <td>Jl. Merdeka</td>
-                            <td><span class="status status-green">Selesai</span></td>
-                        </tr>
+                        <?php foreach ($recent_reports as $r): ?>
+                            <tr>
+                                <td><?= htmlspecialchars(date('d M Y', strtotime($r['created_at']))) ?></td>
+                                <td><?= htmlspecialchars($r['alamat']) ?></td>
+                                <td>
+                                    <?php
+                                    $status_class = match ($r['status']) {
+                                        'Diterima' => 'status-green',
+                                        'Diproses' => 'status-yellow',
+                                        'Ditolak' => 'status-red',
+                                        default => 'status-yellow'
+                                    };
+                                    ?>
+                                    <span class="status <?= $status_class ?>"><?= htmlspecialchars($r['status']) ?></span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
+    <!-- Animasi Navigasi -->
     <script>
-        // Filter button toggle
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            const mainContent = document.getElementById('mainContent');
 
-                // Di sini bisa ditambahkan logika untuk update data statistik berdasarkan filter
-                // Contoh: fetch data dari server berdasarkan periode
-                console.log('Filter:', this.textContent.trim());
+            // Fade-in saat halaman dimuat
+            setTimeout(() => {
+                body.classList.add('fade-in-ready');
+            }, 50);
+
+            // Fade-out saat navigasi
+            document.querySelectorAll('.menu-item a, .filter-controls a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mainContent.style.opacity = '0';
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 200);
+                });
+            });
+
+            // Form submit (filter)
+            document.querySelectorAll('.filter-controls form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    mainContent.style.opacity = '0';
+                });
             });
         });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainContent = document.getElementById('mainContent');
 
-        // Simulasi hover effect pada bar chart
-        document.querySelectorAll('.bar').forEach(bar => {
-            bar.addEventListener('mouseenter', function() {
-                this.style.height = (parseInt(this.style.height) + 10) + 'px';
+            // Terapkan fade out saat klik link internal (kecuali logout)
+            document.querySelectorAll('.menu-item, .filter-controls a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.tagName === 'A') {
+                        e.preventDefault();
+                        const url = this.href;
+                        mainContent.classList.add('fade-out');
+                        setTimeout(() => {
+                            window.location.href = url;
+                        }, 200);
+                    }
+                });
             });
-            bar.addEventListener('mouseleave', function() {
-                this.style.height = (parseInt(this.style.height) - 10) + 'px';
+
+            // Untuk tombol submit form (filter)
+            document.querySelectorAll('.filter-controls form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    mainContent.classList.add('fade-out');
+                    // Biarkan form submit normal setelah animasi
+                    setTimeout(() => {
+                        // Form akan submit sendiri karena tidak dicegah
+                    }, 200);
+                });
             });
         });
     </script>

@@ -1,11 +1,69 @@
+<?php
+session_start();
+require_once '../KoneksiDatabase/koneksi.php';
+
+$mode = 'tambah';
+$tps = null;
+
+if (isset($_GET['id'])) {
+    $id = (int)$_GET['id'];
+    $stmt = $pdo->prepare("SELECT * FROM tps WHERE id_tps = ?");
+    $stmt->execute([$id]);
+    $tps = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$tps) die("Data TPS tidak ditemukan.");
+    $mode = 'edit';
+}
+
+// Handle simpan
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id_tps'] ?? null;
+    $nama_tps = trim($_POST['nama_tps'] ?? '');
+    $lokasi = trim($_POST['lokasi'] ?? ''); // koordinat
+    $alamat = trim($_POST['alamat'] ?? ''); // alamat lengkap
+    $kapasitas = trim($_POST['kapasitas'] ?? '');
+    $keterangan = trim($_POST['keterangan'] ?? '');
+
+    if (empty($nama_tps)) {
+        $error = "Nama TPS wajib diisi!";
+    } else {
+        try {
+            $kapasitas = $kapasitas === '' ? null : (int)$kapasitas;
+            $lokasi = $lokasi === '' ? null : $lokasi;
+            $alamat = $alamat === '' ? null : $alamat;
+            $keterangan = $keterangan === '' ? null : $keterangan;
+
+            if ($mode === 'edit') {
+                $stmt = $pdo->prepare("
+                    UPDATE tps 
+                    SET nama_tps = ?, lokasi = ?, alamat = ?, kapasitas = ?, keterangan = ? 
+                    WHERE id_tps = ?
+                ");
+                $stmt->execute([$nama_tps, $lokasi, $alamat, $kapasitas, $keterangan, $id]);
+            } else {
+                $stmt = $pdo->prepare("
+                    INSERT INTO tps (nama_tps, lokasi, alamat, kapasitas, keterangan) 
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([$nama_tps, $lokasi, $alamat, $kapasitas, $keterangan]);
+            }
+            header("Location: kelolaTPS.php?" . ($mode === 'edit' ? 'edit=1' : 'tambah=1'));
+            exit;
+        } catch (Exception $e) {
+            $error = "Gagal menyimpan data: " . htmlspecialchars($e->getMessage());
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form TPS - SIMPELSI</title>
+    <title><?= $mode === 'edit' ? 'Edit' : 'Tambah' ?> TPS - SIMPELSI</title>
     <style>
+        /* CSS tetap sama seperti sebelumnya */
         * {
             margin: 0;
             padding: 0;
@@ -19,7 +77,15 @@
             min-height: 100vh;
         }
 
-        /* Header */
+        body.fade-in .main-content {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        body.fade-in-ready .main-content {
+            opacity: 1;
+        }
+
         .header {
             width: 100%;
             background: #2e8b57;
@@ -59,57 +125,70 @@
             border-radius: 5px;
             font-size: 12px;
             font-weight: bold;
-            cursor: pointer;
+            text-decoration: none;
             display: flex;
             align-items: center;
             gap: 5px;
         }
 
-        /* Sidebar */
+        .header-exit:hover {
+            background: #e6ffe6;
+            transform: scale(1.05);
+        }
+
         .sidebar {
             width: 250px;
             background: #e6e6e6;
-            padding: 80px 20px 20px;
             position: fixed;
             top: 60px;
             left: 0;
             bottom: 0;
+            padding: 20px 0;
             overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
             z-index: 999;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-menu {
             list-style: none;
+            padding: 0 20px;
+            margin: 0;
+            flex: 1;
         }
 
         .menu-item {
-            padding: 15px 20px;
-            margin-bottom: 10px;
+            padding: 14px 20px;
+            margin-bottom: 8px;
             background: white;
             border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
             color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .menu-item:hover {
             background: #f0f0f0;
+            transform: translateX(4px);
         }
 
         .menu-item.active {
             background: #2e8b57;
             color: white;
-            border: 2px solid white;
+            border: none;
+            box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
         }
 
         .menu-icon {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             background: #2e8b57;
             color: white;
             border-radius: 50%;
@@ -117,6 +196,7 @@
             align-items: center;
             justify-content: center;
             font-size: 16px;
+            flex-shrink: 0;
         }
 
         .menu-item.active .menu-icon {
@@ -124,31 +204,28 @@
             color: #2e8b57;
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 250px;
-            padding: 80px 30px 30px;
-            background: white;
-        }
-
-        .content-header {
-            margin-bottom: 20px;
+            padding: 80px 30px 40px;
+            background: #f9f9f9;
+            min-height: 100vh;
         }
 
         .content-header h2 {
             color: #2e8b57;
             font-size: 24px;
+            margin-bottom: 20px;
         }
 
-        /* Form Container */
         .form-container {
             background: white;
-            padding: 25px;
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            max-width: 800px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            max-width: 1000px;
             margin: 0 auto;
+            width: 100%;
         }
 
         .form-title {
@@ -182,18 +259,10 @@
         .form-input,
         .form-textarea {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #2e8b57;
-            box-shadow: 0 0 0 2px rgba(46, 139, 87, 0.1);
         }
 
         .form-textarea {
@@ -201,63 +270,22 @@
             resize: vertical;
         }
 
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            background: #fafafa;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-area:hover {
-            border-color: #2e8b57;
-            background: #f0f9f4;
-        }
-
-        .upload-area input[type="file"] {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        .upload-icon {
-            font-size: 36px;
-            color: #888;
-            margin-bottom: 10px;
-        }
-
-        .upload-text {
-            color: #666;
+        .alert {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
             font-size: 14px;
         }
 
-        .upload-preview {
-            margin-top: 15px;
-            display: none;
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
         }
 
-        .upload-preview img {
-            max-width: 100%;
-            max-height: 150px;
-            border-radius: 6px;
-            object-fit: contain;
-            border: 1px solid #ddd;
-        }
-
-        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 12px;
             margin-top: 25px;
-            justify-content: flex-start;
         }
 
         .btn {
@@ -267,7 +295,6 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;
-            transition: background 0.2s;
         }
 
         .btn-primary {
@@ -275,29 +302,15 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #226b42;
-        }
-
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
+        .btn:hover {
+            opacity: 0.9;
         }
 
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 width: 200px;
@@ -310,15 +323,10 @@
 
             .form-row {
                 flex-direction: column;
-                gap: 15px;
             }
 
             .form-group {
                 min-width: 100%;
-            }
-
-            .upload-area {
-                padding: 15px;
             }
         }
 
@@ -326,26 +334,12 @@
             .sidebar {
                 width: 100%;
                 position: static;
-                height: auto;
-                box-shadow: none;
                 border-bottom: 2px solid #2e8b57;
             }
 
             .main-content {
                 margin-left: 0;
                 padding-top: 100px;
-            }
-
-            .header {
-                position: static;
-            }
-
-            .form-container {
-                padding: 15px;
-            }
-
-            .form-title {
-                font-size: 18px;
             }
 
             .action-buttons {
@@ -355,7 +349,7 @@
     </style>
 </head>
 
-<body>
+<body class="fade-in">
     <!-- Header -->
     <div class="header">
         <div class="header-title">
@@ -365,200 +359,155 @@
                 <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
-        <div class="header-exit">
+        <a href="../login/logout.php" class="header-exit">
             <span>←</span> KELUAR
-        </div>
+        </a>
     </div>
 
     <!-- Sidebar -->
     <div class="sidebar">
         <ul class="sidebar-menu">
-            <li>
-                <a href="dashboardAdmin.php" class="menu-item">
-                    <div>Beranda</div>
-                </a>
-            </li>
-            <li>
-                <a href="kelolaLaporan.php" class="menu-item">
-                    <div class="menu-icon">📋</div>
-                    <div>Kelola Laporan Aduan</div>
-                </a>
-            </li>
-            <li>
-                <a href="kelolaArtikel.php" class="menu-item">
-                    <div class="menu-icon">📝</div>
-                    <div>Kelola Artikel Edukasi</div>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="menu-item active">
-                    <div class="menu-icon">🗑️</div>
-                    <div>Kelola Informasi TPS</div>
-                </a>
-            </li>
+            <li><a href="dashboardAdmin.php" class="menu-item">
+                    <div class="menu-icon">📊</div>Beranda
+                </a></li>
+            <li><a href="kelolaLaporan.php" class="menu-item">
+                    <div class="menu-icon">📋</div>Kelola Laporan Aduan
+                </a></li>
+            <li><a href="kelolaArtikel.php" class="menu-item">
+                    <div class="menu-icon">📝</div>Kelola Artikel Edukasi
+                </a></li>
+            <li><a href="kelolaTPS.php" class="menu-item active">
+                    <div class="menu-icon">🗑️</div>Kelola Informasi TPS
+                </a></li>
         </ul>
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content" id="mainContent">
         <div class="content-header">
-            <h2>Kelola Informasi TPS</h2>
+            <h2><?= $mode === 'edit' ? 'Edit Informasi TPS' : 'Tambah Informasi TPS' ?></h2>
         </div>
 
         <div class="form-container">
-            <div class="form-title">Tambah/Edit Informasi TPS</div>
+            <div class="form-title"><?= $mode === 'edit' ? 'Edit TPS' : 'Form Tambah TPS' ?></div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Nomor ID TPS</label>
-                    <input type="text" class="form-input" id="idInput" placeholder="Masukkan Nomor ID TPS" value="">
-                </div>
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
 
-                <div class="form-group">
-                    <label class="form-label">Nama TPS</label>
-                    <input type="text" class="form-input" id="namaInput" placeholder="Masukkan nama TPS" value="">
-                </div>
-            </div>
+            <form method="POST" action="">
+                <?php if ($mode === 'edit'): ?>
+                    <input type="hidden" name="id_tps" value="<?= htmlspecialchars($tps['id_tps']) ?>">
+                <?php endif; ?>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Kecamatan</label>
-                    <select class="form-input" id="kecamatanInput">
-                        <option value="">Pilih Kecamatan</option>
-                        <option value="WILANGAN">Wilangan</option>
-                        <option value="BAGOR">Bagor</option>
-                        <option value="REJOSO">Rejoso</option>
-                        <option value="NGALIJK">Ngalijk</option>
-                        <option value="PACE">Pace</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Alamat Lengkap</label>
-                    <textarea class="form-textarea" id="alamatInput" placeholder="Masukkan alamat lengkap TPS..."></textarea>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Koordinat GPS (Latitude, Longitude)</label>
-                    <input type="text" class="form-input" id="koordinatInput" placeholder="Contoh: -7.854321, 112.123456" value="">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Upload Foto Lokasi TPS</label>
-                    <div class="upload-area" id="uploadArea">
-                        <div class="upload-icon">📁</div>
-                        <div class="upload-text">Seret atau klik untuk upload foto lokasi TPS</div>
-                        <input type="file" id="fotoInput" accept="image/*" onchange="previewImage(event)">
-                        <div class="upload-preview" id="uploadPreview"></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nama TPS</label>
+                        <input type="text" name="nama_tps" class="form-input"
+                            value="<?= htmlspecialchars($tps['nama_tps'] ?? '') ?>" required>
                     </div>
                 </div>
-            </div>
 
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="resetForm()">KEMBALI</button>
-                <button class="btn btn-primary" onclick="simpanTPS()">SIMPAN</button>
-                <button class="btn btn-danger" onclick="hapusTPS()" style="display:none;" id="hapusBtn">HAPUS</button>
-            </div>
+                <!-- KOORDINAT GPS -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Koordinat GPS (Latitude, Longitude)</label>
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <textarea name="lokasi" id="koordinatInput" class="form-textarea"
+                                placeholder="Contoh: -7.854321,112.123456"
+                                oninput="formatKoordinat(this)"><?= htmlspecialchars($tps['lokasi'] ?? '') ?></textarea>
+                            <button type="button" class="btn btn-secondary" style="height: fit-content; padding: 12px 12px;"
+                                onclick="bukaGoogleMaps()">
+                                🗺️ Pilih di Maps
+                            </button>
+                        </div>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 6px;">
+                            1. Klik tombol "Pilih di Maps"<br>
+                            2. Klik lokasi di Google Maps → koordinat muncul di kiri bawah<br>
+                            3. Salin & tempel ke kolom di atas
+                        </small>
+                    </div>
+                </div>
+
+                <!-- ALAMAT LENGKAP -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Alamat Lengkap</label>
+                        <textarea name="alamat" class="form-textarea"
+                            placeholder="Contoh: Jl. Merdeka No. 15, Kel. Beran, Kec. Nganjuk"><?= htmlspecialchars($tps['alamat'] ?? '') ?></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Kapasitas (opsional)</label>
+                        <input type="number" name="kapasitas" class="form-input"
+                            value="<?= htmlspecialchars($tps['kapasitas'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Keterangan (opsional)</label>
+                        <textarea name="keterangan" class="form-textarea"><?= htmlspecialchars($tps['keterangan'] ?? '') ?></textarea>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="kelolaTPS.php" class="btn btn-secondary">BATAL</a>
+                    <button type="submit" class="btn btn-primary">
+                        <?= $mode === 'edit' ? 'SIMPAN PERUBAHAN' : 'SIMPAN TPS' ?>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // Simulasikan data TPS (nanti ganti dengan fetch dari API)
-        let currentTPS = null;
+        const koordinatTersimpan = <?= json_encode($tps['lokasi'] ?? null) ?>;
 
-        // Preview gambar saat diupload
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        function bukaGoogleMaps() {
+            let url = 'https://www.google.com/maps';
 
-            const preview = document.getElementById('uploadPreview');
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            preview.innerHTML = '';
-            preview.appendChild(img);
-            preview.style.display = 'block';
-        }
-
-        // Reset form
-        function resetForm() {
-            document.getElementById('idInput').value = '';
-            document.getElementById('namaInput').value = '';
-            document.getElementById('kecamatanInput').value = '';
-            document.getElementById('alamatInput').value = '';
-            document.getElementById('koordinatInput').value = '';
-            document.getElementById('fotoInput').value = '';
-            document.getElementById('uploadPreview').style.display = 'none';
-            document.getElementById('hapusBtn').style.display = 'none';
-            currentTPS = null;
-            window.location.href = 'tps.html'; // Kembali ke daftar TPS
-        }
-
-        // Simpan TPS (nanti ganti dengan fetch PUT/POST)
-        function simpanTPS() {
-            const id = document.getElementById('idInput').value.trim();
-            const nama = document.getElementById('namaInput').value.trim();
-            const kecamatan = document.getElementById('kecamatanInput').value;
-            const alamat = document.getElementById('alamatInput').value.trim();
-            const koordinat = document.getElementById('koordinatInput').value.trim();
-
-            if (!id || !nama || !kecamatan || !alamat) {
-                alert('Semua field wajib diisi!');
-                return;
-            }
-
-            if (currentTPS) {
-                alert(`Data TPS "${nama}" berhasil diperbarui!`);
+            if (koordinatTersimpan && /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(koordinatTersimpan)) {
+                url = `https://www.google.com/maps/@${koordinatTersimpan},18z`;
             } else {
-                alert(`Data TPS "${nama}" berhasil disimpan!`);
+                // Default: Nganjuk
+                url = 'https://www.google.com/maps/@-7.599401,111.900081,11z';
             }
 
-            // Di sini kamu bisa kirim ke server via fetch()
-            // Contoh: fetch('/api/tps', { method: 'POST', body: JSON.stringify(...) })
-
-            resetForm();
+            window.open(url, '_blank');
         }
 
-        // Hapus TPS (jika sedang edit)
-        function hapusTPS() {
-            if (confirm('Yakin ingin menghapus data TPS ini?')) {
-                alert('Data TPS berhasil dihapus!');
-                resetForm();
+        function formatKoordinat(input) {
+            let value = input.value.replace(/\s+/g, '');
+            if (/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(value)) {
+                input.style.borderColor = '#2e8b57';
+                input.style.boxShadow = '0 0 0 2px rgba(46, 139, 87, 0.2)';
+            } else {
+                input.style.borderColor = '#dc3545';
+                input.style.boxShadow = '0 0 0 2px rgba(220, 53, 69, 0.2)';
             }
+            input.value = value;
         }
 
-        // Jika ingin edit TPS, panggil fungsi ini dengan data
-        function loadTPS(data) {
-            currentTPS = data;
-            document.getElementById('idInput').value = data.id || '';
-            document.getElementById('namaInput').value = data.nama || '';
-            document.getElementById('kecamatanInput').value = data.kecamatan || '';
-            document.getElementById('alamatInput').value = data.alamat || '';
-            document.getElementById('koordinatInput').value = data.koordinat || '';
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            const mainContent = document.getElementById('mainContent');
 
-            if (data.fotoUrl) {
-                const preview = document.getElementById('uploadPreview');
-                const img = document.createElement('img');
-                img.src = data.fotoUrl;
-                preview.innerHTML = '';
-                preview.appendChild(img);
-                preview.style.display = 'block';
-            }
+            setTimeout(() => {
+                body.classList.add('fade-in-ready');
+            }, 50);
 
-            document.getElementById('hapusBtn').style.display = 'inline-block';
-        }
-
-        // Cek apakah ada data edit dari localStorage
-        document.addEventListener('DOMContentLoaded', () => {
-            const editData = localStorage.getItem('editTPS');
-            if (editData) {
-                loadTPS(JSON.parse(editData));
-                localStorage.removeItem('editTPS'); // Hapus setelah dipakai
+            const btnBatal = document.querySelector('a.btn-secondary');
+            if (btnBatal) {
+                btnBatal.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mainContent.style.opacity = '0';
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 200);
+                });
             }
         });
     </script>

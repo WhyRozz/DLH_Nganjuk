@@ -1,3 +1,16 @@
+<?php
+session_start();
+
+// Proteksi: hanya admin yang sudah login
+// if (!isset($_SESSION['admin_id'])) {
+//     header("Location: ../login/login.php");
+//     exit;
+// }
+
+// Load koneksi database
+require_once '../KoneksiDatabase/koneksi.php';
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -17,6 +30,16 @@
             background: #f5f5f5;
             display: flex;
             min-height: 100vh;
+        }
+
+        /* Fade-in saat halaman load */
+        body.fade-in .main-content {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        body.fade-in-ready .main-content {
+            opacity: 1;
         }
 
         /* Header */
@@ -63,53 +86,69 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            text-decoration: none;
+        }
+
+        .header-exit:hover {
+            background: #e6ffe6;
+            transform: scale(1.05);
         }
 
         /* Sidebar */
         .sidebar {
             width: 250px;
             background: #e6e6e6;
-            padding: 80px 20px 20px;
             position: fixed;
             top: 60px;
             left: 0;
             bottom: 0;
+            padding: 20px 0;
             overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
             z-index: 999;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-menu {
             list-style: none;
+            padding: 0 20px;
+            margin: 0;
+            flex: 1;
         }
 
         .menu-item {
-            padding: 15px 20px;
-            margin-bottom: 10px;
+            padding: 14px 20px;
+            margin-bottom: 8px;
             background: white;
             border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
             color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .menu-item:hover {
             background: #f0f0f0;
+            transform: translateX(4px);
         }
 
         .menu-item.active {
             background: #2e8b57;
             color: white;
-            border: 2px solid white;
+            border: none;
+            box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
         }
 
         .menu-icon {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             background: #2e8b57;
             color: white;
             border-radius: 50%;
@@ -117,6 +156,7 @@
             align-items: center;
             justify-content: center;
             font-size: 16px;
+            flex-shrink: 0;
         }
 
         .menu-item.active .menu-icon {
@@ -128,8 +168,9 @@
         .main-content {
             flex: 1;
             margin-left: 250px;
-            padding: 80px 30px 30px;
-            background: white;
+            padding: 80px 30px 40px;
+            background: #f9f9f9;
+            min-height: 100vh;
         }
 
         .content-header {
@@ -146,7 +187,7 @@
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow-x: auto;
         }
 
@@ -164,7 +205,8 @@
             font-size: 14px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
@@ -266,7 +308,8 @@
                 margin-left: 200px;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 10px 8px;
                 font-size: 13px;
             }
@@ -317,19 +360,19 @@
     </style>
 </head>
 
-<body>
+<body class="fade-in">
     <!-- Header -->
     <div class="header">
         <div class="header-title">
             <div class="header-logo">S</div>
             <div>
-                <div style="font-size: 18px; font-weight: bold;"> Beranda</div>
+                <div style="font-size: 18px; font-weight: bold;">Beranda</div>
                 <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
-        <div class="header-exit">
+        <a href="../dashboard.php" class="header-exit">
             <span>←</span> KELUAR
-        </div>
+        </a>
     </div>
 
     <!-- Sidebar -->
@@ -337,6 +380,7 @@
         <ul class="sidebar-menu">
             <li>
                 <a href="dashboardAdmin.php" class="menu-item">
+                    <div class="menu-icon">📊</div>
                     <div>Beranda</div>
                 </a>
             </li>
@@ -353,7 +397,7 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="menu-item active">
+                <a href="kelolaTPS.php" class="menu-item active">
                     <div class="menu-icon">🗑️</div>
                     <div>Kelola Informasi TPS</div>
                 </a>
@@ -362,7 +406,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content" id="mainContent">
         <div class="content-header">
             <h2>Kelola TPS</h2>
         </div>
@@ -373,91 +417,136 @@
             <table>
                 <thead>
                     <tr>
-                        <th>NOMOR ID</th>
+                        <th>ID</th>
                         <th>NAMA TPS</th>
-                        <th>KECAMATAN</th>
+                        <th>LOKASI</th>
+                        <th>KAPASITAS</th>
+                        <th>KETERANGAN</th>
                         <th>ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="tpsTableBody">
-                    <!-- Data akan diisi oleh JavaScript -->
+                    <?php
+                    // Ambil semua data TPS dari database
+                    try {
+                        $stmt = $pdo->query("SELECT * FROM tps ORDER BY id_tps ASC");
+                        $tpsList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        foreach ($tpsList as $tps): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($tps['id_tps']) ?></td>
+                                <td><?= htmlspecialchars($tps['nama_tps']) ?></td>
+                                <td>
+                                    <?php if (!empty($tps['lokasi']) && preg_match('/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/', $tps['lokasi'])): ?>
+                                        <a href="https://maps.google.com/maps?q=<?= urlencode($tps['lokasi']) ?>"
+                                            target="_blank"
+                                            style="color: #2e8b57; text-decoration: none;">
+                                            🗺️ Lihat di Maps
+                                        </a>
+                                    <?php else: ?>
+                                        <?= htmlspecialchars($tps['lokasi'] ?? '-') ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= htmlspecialchars($tps['kapasitas'] ?? '-') ?></td>
+                                <td><?= htmlspecialchars(substr($tps['keterangan'] ?? '', 0, 30)) ?><?= strlen($tps['keterangan'] ?? '') > 30 ? '...' : '' ?></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <a href="form-tps.php?id=<?= $tps['id_tps'] ?>" class="btn-action btn-edit">✏️</a>
+                                        <button class="btn-action btn-delete" onclick="hapusTPS(<?= $tps['id_tps'] ?>)">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach;
+
+                        if (empty($tpsList)): ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                                    Belum ada data TPS.
+                                </td>
+                            </tr>
+                    <?php endif;
+                    } catch (Exception $e) {
+                        echo '<tr><td colspan="6" style="color: red; text-align: center;">Error: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
+                    }
+                    ?>
                 </tbody>
             </table>
 
             <div class="footer-buttons">
-                <button class="btn-footer btn-back" onclick="kembali()">KEMBALI</button>
-                <button class="btn-footer btn-create" onclick="buatTPS()">
+                <a href="dashboardAdmin.php" class="btn-footer btn-back">KEMBALI</a>
+                <a href="form-tps.php" class="btn-footer btn-create">
                     <span>➕</span> BUAT INFO TPS
-                </button>
+                </a>
             </div>
         </div>
     </div>
 
     <script>
-        // Simulasikan data TPS
-        const tpsData = [
-            { id: 1, nama: "TPS 1 KECAMATAN WILANGAN", kecamatan: "WILANGAN" },
-            { id: 2, nama: "TPS 2 KECAMATAN BAGOR", kecamatan: "BAGOR" },
-            { id: 3, nama: "TPS 3 KECAMATAN REJOSO", kecamatan: "REJOSO" },
-            { id: 4, nama: "TPS 4 KECAMATAN NGALIJK", kecamatan: "NGALIJK" },
-            { id: 5, nama: "TPS 5 KECAMATAN PACE", kecamatan: "PACE" }
-        ];
+        // === ANIMASI FADE-IN/OUT ===
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            const mainContent = document.getElementById('mainContent');
 
-        // Render tabel
-        function renderTable() {
-            const tableBody = document.getElementById('tpsTableBody');
-            tableBody.innerHTML = '';
+            // Fade-in saat halaman dimuat
+            setTimeout(() => {
+                body.classList.add('fade-in-ready');
+            }, 50);
 
-            tpsData.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.nama}</td>
-                    <td>${item.kecamatan}</td>
-                    <td>
-                        <div class="action-btns">
-                            <div class="btn-action btn-edit" onclick="editTPS(${item.id})">✏️</div>
-                            <div class="btn-action btn-delete" onclick="hapusTPS(${item.id})">🗑️</div>
-                        </div>
-                    </td>
-                `;
-                tableBody.appendChild(row);
+            // Fade-out saat klik menu
+            document.querySelectorAll('.menu-item a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mainContent.style.opacity = '0';
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 200);
+                });
             });
+
+            // Fade-out saat klik tombol KEMBALI atau BUAT
+            document.querySelectorAll('.btn-back, .btn-create').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    mainContent.style.opacity = '0';
+                    setTimeout(() => {
+                        // Biarkan fungsi asli jalan (karena kita tidak preventDefault)
+                    }, 200);
+                });
+            });
+        });
+
+        function bukaGoogleMaps() {
+            // Buka di tab baru, tanpa mengganggu halaman ini
+            window.open('https://www.google.com/maps/@-7.5728974,110.8321999,7z', '_blank');
         }
 
-        // Fungsi kembali ke dashboard atau halaman sebelumnya
-        function kembali() {
-            window.history.back(); // atau ganti dengan window.location.href = 'dashboard.html';
-        }
-
-        // Fungsi buat info TPS (redirect ke form)
-        function buatTPS() {
-            window.location.href = 'form-tps.php'; // Ganti dengan nama file form TPS Anda
-        }
-
-        // Fungsi edit TPS
-        function editTPS(id) {
-            const tps = tpsData.find(t => t.id === id);
-            if (!tps) return;
-
-            localStorage.setItem('editTPS', JSON.stringify(tps));
-            window.location.href = 'form-tps.php';
+        function formatKoordinat(input) {
+            let value = input.value.replace(/\s+/g, '');
+            if (/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/.test(value)) {
+                input.style.borderColor = '#2e8b57';
+                input.style.boxShadow = '0 0 0 2px rgba(46, 139, 87, 0.2)';
+            } else {
+                input.style.borderColor = '#dc3545';
+                input.style.boxShadow = '0 0 0 2px rgba(220, 53, 69, 0.2)';
+            }
+            input.value = value;
         }
 
         // Fungsi hapus TPS
         function hapusTPS(id) {
             if (confirm('Yakin ingin menghapus data TPS ini?')) {
-                const index = tpsData.findIndex(t => t.id === id);
-                if (index !== -1) {
-                    tpsData.splice(index, 1);
-                    renderTable();
-                    alert('Data TPS berhasil dihapus!');
-                }
+                // Kirim request via form atau AJAX
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'delete-tps.php'; // buat file delete_tps.php jika perlu
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = id;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
             }
         }
-
-        // Inisialisasi
-        document.addEventListener('DOMContentLoaded', renderTable);
     </script>
 </body>
 
