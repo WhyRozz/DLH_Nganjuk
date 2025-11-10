@@ -1,12 +1,9 @@
 <?php
-// --- AWAL KODE PHP (Backend) ---
-session_start();
-
-// ⚠️ GANTI SESUAI DENGAN DATABASE DI AWARDSpace
+// Koneksi database
 $host = 'fdb1034.awardspace.net';
-$db   = '4698762_simpelsi'; // Contoh: u123456789_simpelsi
-$user = '4698762_simpelsi';   // Contoh: u123456789_admin
-$pass = 'katasandi123';   // Password DB-mu
+$db   = '4698762_simpelsi';
+$user = '4698762_simpelsi';
+$pass = 'katasandi123';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -22,82 +19,97 @@ try {
     die("Koneksi gagal: " . htmlspecialchars($e->getMessage()));
 }
 
-// Buat tabel jika belum ada (opsional, cukup sekali)
-try {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS artikel (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        judul VARCHAR(255) NOT NULL,
-        tanggal DATE NOT NULL,
-        deskripsi TEXT NOT NULL,
-        foto VARCHAR(255) NULL
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-} catch (Exception $e) {
-    // Abaikan error tabel sudah ada
+// Inisialisasi variabel
+$id = null;
+$judul = '';
+$deskripsi = '';
+$tanggal = date('Y-m-d\TH:i');
+$fotoLama = '';
+
+// Jika edit
+if (isset($_GET['edit'])) {
+    $id = (int)$_GET['edit'];
+    $stmt = $pdo->prepare("SELECT * FROM artikel WHERE id_artikel = ?");
+    $stmt->execute([$id]);
+    $artikel = $stmt->fetch();
+    if ($artikel) {
+        $judul = htmlspecialchars($artikel['judul'], ENT_QUOTES, 'UTF-8');
+        $deskripsi = $artikel['deskripsi']; // jangan htmlspecialchars() untuk textarea
+        $tanggal = date('Y-m-d\TH:i', strtotime($artikel['tanggal']));
+        $fotoLama = $artikel['foto'];
+    } else {
+        die("Artikel tidak ditemukan.");
+    }
 }
 
-// Handle simpan artikel
-$pesan = '';
+// Handle simpan
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id'] ?? null;
     $judul = trim($_POST['judul'] ?? '');
-    $tanggal = $_POST['tanggal'] ?? '';
     $deskripsi = trim($_POST['deskripsi'] ?? '');
+    $tanggal = $_POST['tanggal'] ?? '';
 
     if (empty($judul) || empty($deskripsi) || empty($tanggal)) {
-        $pesan = 'error:Semua kolom wajib diisi!';
+        $error = "Judul, deskripsi, dan tanggal wajib diisi!";
     } else {
-        $fotoNama = null;
+        $fotoNama = $fotoLama;
         if (!empty($_FILES['foto']['name'])) {
-            $targetDir = "uploads/artikel/";
+            // ✅ SESUAIKAN PATH: dari MainCode/Admin/ ke api/artikel/
+            $targetDir = "../../../api/artikel/";
+
+            // Pastikan folder ada
             if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0755, true);
+                if (!mkdir($targetDir, 0755, true)) {
+                    $error = "Gagal membuat folder: pastikan 'api/uploads/artikel/' bisa ditulis (permission 755).";
+                }
             }
 
             $fileExt = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
             if (!in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
-                $pesan = 'error:Format gambar tidak didukung!';
+                $error = "Format gambar tidak didukung! Gunakan JPG, JPEG, PNG, atau GIF.";
             } else {
+                // Hapus foto lama jika ada
+                if ($fotoLama && file_exists($targetDir . $fotoLama)) {
+                    unlink($targetDir . $fotoLama);
+                }
+
                 $fotoNama = uniqid('artikel_') . '.' . $fileExt;
                 $targetFile = $targetDir . $fotoNama;
+
                 if (!move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
-                    $pesan = 'error:Gagal mengupload gambar!';
+                    $error = "Gagal mengupload gambar! Periksa permission folder 'api/uploads/artikel/'.";
                 }
             }
         }
 
-        if (empty($pesan)) {
+        if (empty($error)) {
             try {
-                $stmt = $pdo->prepare("INSERT INTO artikel (judul, tanggal, deskripsi, foto) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$judul, $tanggal, $deskripsi, $fotoNama]);
-                $pesan = 'sukses:Artikel berhasil disimpan!';
+                if ($id) {
+                    $stmt = $pdo->prepare("UPDATE artikel SET judul = ?, deskripsi = ?, tanggal = ?, foto = ? WHERE id_artikel = ?");
+                    $stmt->execute([$judul, $deskripsi, $tanggal, $fotoNama, $id]);
+                    $pesan = "Artikel berhasil diperbarui!";
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO artikel (judul, deskripsi, tanggal, foto) VALUES (?, ?, ?, ?)");
+                    $stmt->execute([$judul, $deskripsi, $tanggal, $fotoNama]);
+                    $pesan = "Artikel berhasil disimpan!";
+                }
+                header("Location: kelolaArtikel.php?pesan=" . urlencode($pesan));
+                exit;
             } catch (Exception $e) {
-                $pesan = 'error:Gagal menyimpan ke database!';
+                $error = "Gagal menyimpan ke database.";
             }
         }
     }
-
-    // Redirect dengan pesan
-    header("Location: " . strtok($_SERVER['REQUEST_URI'], '?') . "?pesan=" . urlencode($pesan));
-    exit;
 }
-
-// Ambil pesan dari URL
-$alertPesan = '';
-if (isset($_GET['pesan'])) {
-    $pesanParts = explode(':', $_GET['pesan'], 2);
-    $jenis = $pesanParts[0];
-    $teks = $pesanParts[1] ?? '';
-    $alertPesan = htmlspecialchars($teks);
-}
-// --- AKHIR KODE PHP ---
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Artikel - SIMPELSI</title>
+    <title><?= $id ? 'Edit' : 'Tambah' ?> Artikel - SIMPELSI</title>
     <style>
-        /* --- SAMA DENGAN STYLE-MU --- */
+        /* --- STYLE SAMA --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -106,17 +118,9 @@ if (isset($_GET['pesan'])) {
             min-height: 100vh;
         }
         .header {
-            width: 100%;
-            background: #2e8b57;
-            color: white;
-            padding: 12px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+            width: 100%; background: #2e8b57; color: white;
+            padding: 12px 30px; display: flex; justify-content: space-between;
+            align-items: center; position: fixed; top: 0; left: 0; z-index: 1000;
         }
         .header-title { display: flex; align-items: center; gap: 10px; }
         .header-logo {
@@ -215,8 +219,6 @@ if (isset($_GET['pesan'])) {
         .btn-primary:hover { background: #226b42; }
         .btn-secondary { background: #6c757d; color: white; text-decoration: none; text-align: center; display: inline-block; }
         .btn-secondary:hover { background: #5a6268; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
 
         @media (max-width: 768px) {
             .sidebar { width: 200px; padding: 80px 15px 20px; }
@@ -236,10 +238,8 @@ if (isset($_GET['pesan'])) {
 </head>
 <body>
 
-<?php if ($alertPesan): ?>
-<script>
-    alert("<?= $alertPesan ?>");
-</script>
+<?php if (isset($error)): ?>
+<script>alert("<?= addslashes($error) ?>");</script>
 <?php endif; ?>
 
 <!-- Header -->
@@ -251,9 +251,7 @@ if (isset($_GET['pesan'])) {
             <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
         </div>
     </div>
-    <a href="dashboardAdmin.php" class="header-exit">
-        <span>←</span> EXIT
-    </a>
+    <a href="kelolaArtikel.php" class="header-exit"><span>←</span> BATAL</a>
 </div>
 
 <!-- Sidebar -->
@@ -269,55 +267,60 @@ if (isset($_GET['pesan'])) {
 <!-- Main Content -->
 <div class="main-content">
     <div class="content-header">
-        <h2>Kelola Artikel Edukasi</h2>
+        <h2><?= $id ? 'Edit' : 'Tambah' ?> Artikel Edukasi</h2>
     </div>
 
     <div class="form-container">
-        <div class="form-title">Tambah Artikel Baru</div>
+        <div class="form-title"><?= $id ? 'Edit' : 'Tambah' ?> Artikel</div>
 
-        <!-- Form dengan method POST dan enctype untuk upload file -->
         <form method="POST" action="" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<?= $id ?>">
+
             <div class="form-row">
                 <div class="form-group">
-                <label class="form-label">Upload Foto</label>
-                <div class="upload-area" id="uploadArea">
-                     <div class="upload-icon">📁</div>
-                     <div class="upload-text">Seret atau klik untuk upload foto artikel</div>
-                      <input type="file" id="fotoInput" name="foto" accept="image/*" onchange="previewImage(event)">
-                     <div class="upload-preview" id="uploadPreview"></div>
+                    <label class="form-label">Upload Foto</label>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Klik untuk upload foto artikel</div>
+                        <input type="file" id="fotoInput" name="foto" accept="image/*" onchange="previewImage(event)">
+                        <div class="upload-preview" id="uploadPreview">
+                            <?php if ($fotoLama): ?>
+                                <!-- ✅ TAMPILKAN FOTO DARI LOKASI YANG BENAR -->
+                                <img src="/api/uploads/artikel/<?= htmlspecialchars($fotoLama) ?>" alt="Foto saat ini">
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Judul Artikel</label>
+                    <input type="text" class="form-input" name="judul" value="<?= htmlspecialchars($judul, ENT_QUOTES, 'UTF-8') ?>" required>
                 </div>
             </div>
-
-    <div class="form-group">
-        <label class="form-label">Judul Artikel</label>
-        <input type="text" class="form-input" name="judul" placeholder="Masukkan judul artikel" required>
-    </div>
-</div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Tanggal Publikasi</label>
-                    <input type="date" class="form-input" name="tanggal" value="<?= date('Y-m-d') ?>" required>
+                    <input type="datetime-local" class="form-input" name="tanggal" value="<?= $tanggal ?>" required>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Deskripsi Artikel</label>
-                    <textarea class="form-textarea" name="deskripsi" placeholder="Masukkan deskripsi artikel..." required></textarea>
+                    <textarea class="form-textarea" name="deskripsi" required><?= htmlspecialchars($deskripsi, ENT_QUOTES, 'UTF-8') ?></textarea>
                 </div>
             </div>
 
             <div class="action-buttons">
-                <a href="kelolaArtikel.php" class="btn btn-secondary">RESET</a>
-                <button type="submit" class="btn btn-primary">SIMPAN ARTIKEL</button>
+                <a href="kelolaArtikel.php" class="btn btn-secondary">BATAL</a>
+                <button type="submit" class="btn btn-primary"><?= $id ? 'PERBARUI' : 'SIMPAN' ?> ARTIKEL</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
- // Pastikan area upload bisa diklik untuk membuka file picker
     document.getElementById('uploadArea').addEventListener('click', function() {
         document.getElementById('fotoInput').click();
     });
@@ -325,7 +328,6 @@ if (isset($_GET['pesan'])) {
     function previewImage(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         const preview = document.getElementById('uploadPreview');
         const img = document.createElement('img');
         img.src = URL.createObjectURL(file);

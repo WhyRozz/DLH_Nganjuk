@@ -19,16 +19,17 @@ try {
     die("Koneksi gagal: " . htmlspecialchars($e->getMessage()));
 }
 
-// Handle AJAX update status
+// Handle AJAX update status + balasan
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
     header('Content-Type: application/json');
     $id = (int)($_POST['id'] ?? 0);
     $status = trim($_POST['status'] ?? '');
-    
+    $balasan = trim($_POST['balasan'] ?? '');
+
     if ($id > 0 && in_array($status, ['Diproses', 'Diterima', 'Ditolak'])) {
         try {
-            $stmt = $pdo->prepare("UPDATE laporan SET status = ? WHERE id = ?");
-            $stmt->execute([$status, $id]);
+            $stmt = $pdo->prepare("UPDATE laporan SET status = ?, balasan = ? WHERE id = ?");
+            $stmt->execute([$status, $balasan ?: NULL, $id]);
             echo json_encode(['success' => true]);
         } catch (Exception $e) {
             echo json_encode(['success' => false]);
@@ -50,7 +51,7 @@ $laporanList = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Laporan Aduan - SIMPELSI</title>
     <style>
-        /* --- STYLE TETAP SAMA --- */
+        /* --- STYLE SAMA SEPERTI SEBELUMNYA --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -183,6 +184,14 @@ $laporanList = $stmt->fetchAll();
             border-radius: 5px;
             cursor: pointer;
         }
+        .readonly-note {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+            margin-top: 15px;
+        }
 
         @media (max-width: 768px) {
             .sidebar { width: 200px; padding: 80px 15px 20px; }
@@ -223,7 +232,6 @@ $laporanList = $stmt->fetchAll();
         <h2>Kelola Laporan Aduan</h2>
     </div>
 
-    <!-- Search Bar (tanpa tombol, live search) -->
     <div class="search-bar">
         <input type="text" class="search-input" id="searchInput" placeholder="Cari laporan berdasarkan nama atau lokasi...">
     </div>
@@ -247,15 +255,17 @@ $laporanList = $stmt->fetchAll();
                     $lokasi = htmlspecialchars($laporan['lokasi'] ?? '—');
                     $keterangan = htmlspecialchars($laporan['keterangan'] ?? '—');
                     $status = $laporan['status'] ?? 'Diproses';
+                    $balasan = htmlspecialchars($laporan['balasan'] ?? '');
                     $foto = $laporan['foto'] ?? '';
                     $tanggal = !empty($laporan['tanggal']) && $laporan['tanggal'] !== '0000-00-00'
                         ? date('d-m-Y', strtotime($laporan['tanggal']))
                         : '—';
 
-                    // Status class
                     $statusClass = 'diproses';
                     if ($status === 'Diterima') $statusClass = 'diterima';
                     elseif ($status === 'Ditolak') $statusClass = 'ditolak';
+
+                    $isEditable = ($status === 'Diproses');
                 ?>
                 <tr onclick="toggleDetail(<?= (int)$id ?>)">
                     <td><?= $id ?></td>
@@ -295,27 +305,48 @@ $laporanList = $stmt->fetchAll();
                                     <label class="form-label">Keterangan:</label>
                                     <textarea class="form-textarea" readonly><?= $keterangan ?></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Status:</label>
-                                    <div class="status-options">
-                                        <div class="status-option">
-                                            <input type="radio" name="status-<?= $id ?>" id="opt-diproses-<?= $id ?>" value="Diproses" <?= $status === 'Diproses' ? 'checked' : '' ?>>
-                                            <label for="opt-diproses-<?= $id ?>">Diproses</label>
-                                        </div>
-                                        <div class="status-option">
-                                            <input type="radio" name="status-<?= $id ?>" id="opt-diterima-<?= $id ?>" value="Diterima" <?= $status === 'Diterima' ? 'checked' : '' ?>>
-                                            <label for="opt-diterima-<?= $id ?>">Diterima</label>
-                                        </div>
-                                        <div class="status-option">
-                                            <input type="radio" name="status-<?= $id ?>" id="opt-ditolak-<?= $id ?>" value="Ditolak" <?= $status === 'Ditolak' ? 'checked' : '' ?>>
-                                            <label for="opt-ditolak-<?= $id ?>">Ditolak</label>
+
+                                <?php if ($isEditable): ?>
+                                    <div class="form-group">
+                                        <label class="form-label">Status:</label>
+                                        <div class="status-options">
+                                            <div class="status-option">
+                                                <input type="radio" name="status-<?= $id ?>" id="opt-diproses-<?= $id ?>" value="Diproses" <?= $status === 'Diproses' ? 'checked' : '' ?>>
+                                                <label for="opt-diproses-<?= $id ?>">Diproses</label>
+                                            </div>
+                                            <div class="status-option">
+                                                <input type="radio" name="status-<?= $id ?>" id="opt-diterima-<?= $id ?>" value="Diterima" <?= $status === 'Diterima' ? 'checked' : '' ?>>
+                                                <label for="opt-diterima-<?= $id ?>">Diterima</label>
+                                            </div>
+                                            <div class="status-option">
+                                                <input type="radio" name="status-<?= $id ?>" id="opt-ditolak-<?= $id ?>" value="Ditolak" <?= $status === 'Ditolak' ? 'checked' : '' ?>>
+                                                <label for="opt-ditolak-<?= $id ?>">Ditolak</label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn-secondary" onclick="closeDetail(<?= $id ?>)">TUTUP</button>
-                                    <button class="btn-primary" onclick="updateStatus(<?= $id ?>)">SIMPAN STATUS</button>
-                                </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Balasan untuk Masyarakat:</label>
+                                        <textarea class="form-textarea" id="balasan-<?= $id ?>" placeholder="Tulis alasan perubahan status (opsional)"><?= $balasan ?></textarea>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn-secondary" onclick="closeDetail(<?= $id ?>)">TUTUP</button>
+                                        <button class="btn-primary" onclick="updateStatus(<?= $id ?>)">SIMPAN STATUS</button>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="form-group">
+                                        <label class="form-label">Status Akhir:</label>
+                                        <input type="text" class="form-input" value="<?= $status ?>" readonly>
+                                    </div>
+                                    <?php if (!empty($balasan)): ?>
+                                    <div class="form-group">
+                                        <label class="form-label">Balasan:</label>
+                                        <textarea class="form-textarea" readonly><?= $balasan ?></textarea>
+                                    </div>
+                                    <?php endif; ?>
+                                    <div class="readonly-note">
+                                        Laporan ini telah ditarik. Status tidak dapat diubah lagi.
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </td>
@@ -327,7 +358,7 @@ $laporanList = $stmt->fetchAll();
 </div>
 
 <script>
-    // LIVE SEARCH SAAT KETIK
+    // LIVE SEARCH
     document.getElementById('searchInput').addEventListener('input', function() {
         const query = this.value.toLowerCase();
         const rows = document.querySelectorAll('tbody tr:not(.detail-row)');
@@ -338,7 +369,6 @@ $laporanList = $stmt->fetchAll();
         });
     });
 
-    // Toggle detail
     function toggleDetail(id) {
         const detail = document.getElementById(`detail-${id}`);
         const allDetails = document.querySelectorAll('.detail-row');
@@ -352,33 +382,27 @@ $laporanList = $stmt->fetchAll();
         document.getElementById(`detail-${id}`).classList.remove('active');
     }
 
-    // Update status via AJAX
     function updateStatus(id) {
         const selected = document.querySelector(`input[name="status-${id}"]:checked`);
         if (!selected) return alert('Pilih status terlebih dahulu.');
 
         const status = selected.value;
+        const balasan = document.getElementById(`balasan-${id}`).value.trim();
 
         fetch('', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `action=update_status&id=${id}&status=${encodeURIComponent(status)}`
+            body: `action=update_status&id=${id}&status=${encodeURIComponent(status)}&balasan=${encodeURIComponent(balasan)}`
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Update badge di baris utama
-                const badge = document.querySelector(`tr[data-id="${id}"] .status-badge`);
-                if (badge) {
-                    let cls = 'diproses';
-                    if (status === 'Diterima') cls = 'diterima';
-                    else if (status === 'Ditolak') cls = 'ditolak';
-                    badge.className = 'status-badge status-' + cls;
-                    badge.textContent = status;
-                }
-                alert('Status berhasil diperbarui!');
+                alert('Status dan balasan berhasil disimpan!');
+                closeDetail(id);
+                // Refresh halaman agar perubahan terlihat
+                setTimeout(() => location.reload(), 300);
             } else {
-                alert('Gagal memperbarui status.');
+                alert('Gagal menyimpan data.');
             }
         })
         .catch(() => alert('Terjadi kesalahan koneksi.'));
