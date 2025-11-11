@@ -34,7 +34,7 @@ if (isset($_GET['edit'])) {
     $artikel = $stmt->fetch();
     if ($artikel) {
         $judul = htmlspecialchars($artikel['judul'], ENT_QUOTES, 'UTF-8');
-        $deskripsi = $artikel['deskripsi']; // jangan htmlspecialchars() untuk textarea
+        $deskripsi = $artikel['deskripsi'];
         $tanggal = date('Y-m-d\TH:i', strtotime($artikel['tanggal']));
         $fotoLama = $artikel['foto'];
     } else {
@@ -54,22 +54,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $fotoNama = $fotoLama;
         if (!empty($_FILES['foto']['name'])) {
-            // ✅ SESUAIKAN PATH: dari MainCode/Admin/ ke api/artikel/
-            $targetDir = "../../../api/artikel/";
+            // ✅ SESUAIKAN PATH SESUAI STRUKTUR FISIK:
+            // Jika: MainCode/Admin/form-artikel.php
+            // Maka: ../../../api/uploads/artikel/
+            $targetDir = "../../../api/uploads/artikel/";
 
-            // Pastikan folder ada
+            // Buat folder jika belum ada
             if (!is_dir($targetDir)) {
                 if (!mkdir($targetDir, 0755, true)) {
-                    $error = "Gagal membuat folder: pastikan 'api/uploads/artikel/' bisa ditulis (permission 755).";
+                    $error = "Gagal membuat folder uploads. Pastikan permission 'api/uploads/artikel/' = 755.";
                 }
             }
 
             $fileExt = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
             if (!in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
-                $error = "Format gambar tidak didukung! Gunakan JPG, JPEG, PNG, atau GIF.";
+                $error = "Format gambar tidak didukung! Gunakan: JPG, JPEG, PNG, GIF.";
             } else {
-                // Hapus foto lama jika ada
-                if ($fotoLama && file_exists($targetDir . $fotoLama)) {
+                // ✅ HAPUS FOTO LAMA DARI SERVER (jika ada & beda dari yang baru)
+                if ($fotoLama && $fotoLama !== $fotoNama && file_exists($targetDir . $fotoLama)) {
                     unlink($targetDir . $fotoLama);
                 }
 
@@ -77,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $targetFile = $targetDir . $fotoNama;
 
                 if (!move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
-                    $error = "Gagal mengupload gambar! Periksa permission folder 'api/uploads/artikel/'.";
+                    $error = "Gagal upload gambar. Periksa: 1) Ukuran file ≤ 2MB, 2) Permission folder = 755.";
                 }
             }
         }
@@ -96,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: kelolaArtikel.php?pesan=" . urlencode($pesan));
                 exit;
             } catch (Exception $e) {
-                $error = "Gagal menyimpan ke database.";
+                $error = "Gagal menyimpan ke database: " . $e->getMessage();
             }
         }
     }
@@ -134,31 +136,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer; display: flex; align-items: center; gap: 5px;
             text-decoration: none;
         }
-        .sidebar {
-            width: 250px; background: #e6e6e6;
-            padding: 80px 20px 20px; position: fixed;
-            top: 60px; left: 0; bottom: 0;
-            overflow-y: auto; box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            z-index: 999;
-        }
-        .sidebar-menu { list-style: none; }
-        .menu-item {
-            padding: 15px 20px; margin-bottom: 10px; background: white;
-            border-radius: 10px; display: flex; align-items: center;
-            gap: 10px; text-decoration: none; color: #333;
-        }
-        .menu-item:hover { background: #f0f0f0; }
-        .menu-item.active {
-            background: #2e8b57; color: white; border: 2px solid white;
-        }
-        .menu-icon {
-            width: 30px; height: 30px; background: #2e8b57;
-            color: white; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 16px;
-        }
-        .menu-item.active .menu-icon {
-            background: white; color: #2e8b57;
-        }
+        /* Sidebar */
+		.sidebar {
+    		width: 250px;
+    		background: #e6e6e6;
+    		position: fixed;
+    		top: 60px;
+    		left: 0;
+    		bottom: 0;
+    		padding: 20px 0;
+    		overflow-y: auto;
+    		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    		z-index: 999;
+    		display: flex;
+    		flex-direction: column;
+		}
+
+		.sidebar-menu {
+    		list-style: none;
+    		padding: 0 20px;
+    		margin: 0;
+    		flex: 1;
+		}
+
+		.menu-item {
+    		padding: 14px 20px;
+    		margin-bottom: 8px;
+    		background: white;
+    		border-radius: 10px;
+    		cursor: pointer;
+    		transition: all 0.25s ease;
+    		display: flex;
+    		align-items: center;
+    		gap: 12px;
+    		text-decoration: none;
+    		color: #333;
+    		font-weight: 600;
+    		font-size: 14px;
+    		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		}
+	
+		.menu-item:hover {
+    		background: #f0f0f0;
+    		transform: translateX(4px);
+		}
+
+		.menu-item.active {
+    		background: #2e8b57;
+    		color: white;
+    		border: none;
+    		box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
+		}
+
+		.menu-icon {
+    		width: 32px;
+    		height: 32px;
+    		background: #2e8b57;
+    		color: white;
+    		border-radius: 50%;
+    		display: flex;
+    		align-items: center;
+    		justify-content: center;
+    		font-size: 16px;
+    		flex-shrink: 0;
+		}
+
+		.menu-item.active .menu-icon {
+    		background: white;
+    		color: #2e8b57;
+		}
         .main-content {
             flex: 1; margin-left: 250px; padding: 80px 30px 30px;
             background: white;
@@ -202,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .upload-icon { font-size: 36px; color: #888; margin-bottom: 10px; }
         .upload-text { color: #666; font-size: 14px; }
-        .upload-preview { margin-top: 15px; display: none; }
+        .upload-preview { margin-top: 15px; display: <?= $fotoLama ? 'block' : 'none' ?>; }
         .upload-preview img {
             max-width: 100%; max-height: 150px; border-radius: 6px;
             object-fit: contain; border: 1px solid #ddd;
@@ -257,10 +303,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- Sidebar -->
 <div class="sidebar">
     <ul class="sidebar-menu">
-        <li><a href="dashboardAdmin.php" class="menu-item"><div>Kelola Laporan Aduan</div></a></li>
-        <li><a href="kelolaLaporan.php" class="menu-item"><div class="menu-icon">📋</div><div>Kelola Laporan Aduan</div></a></li>
-        <li><a href="kelolaArtikel.php" class="menu-item active"><div class="menu-icon">📝</div><div>Kelola Artikel Edukasi</div></a></li>
-        <li><a href="kelolaTPS.php" class="menu-item"><div class="menu-icon">🗑️</div><div>Kelola Informasi TPS</div></a></li>
+        <li>
+            <a href="dashboardAdmin.php" class="menu-item">
+                <div class="menu-icon">📊</div>
+                <div>Beranda</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaLaporan.php" class="menu-item">
+                <div class="menu-icon">📋</div>
+                <div>Kelola Laporan Aduan</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaArtikel.php" class="menu-item active">
+                <div class="menu-icon">📝</div>
+                <div>Kelola Artikel Edukasi</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaTPS.php" class="menu-item">
+                <div class="menu-icon">🗑️</div>
+                <div>Kelola Informasi TPS</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaAkun.php" class="menu-item">
+                <div class="menu-icon">🔐</div>
+                <div>Kelola Akun</div>
+            </a>
+        </li>
     </ul>
 </div>
 
@@ -285,8 +357,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="file" id="fotoInput" name="foto" accept="image/*" onchange="previewImage(event)">
                         <div class="upload-preview" id="uploadPreview">
                             <?php if ($fotoLama): ?>
-                                <!-- ✅ TAMPILKAN FOTO DARI LOKASI YANG BENAR -->
-                                <img src="/api/uploads/artikel/<?= htmlspecialchars($fotoLama) ?>" alt="Foto saat ini">
+                                <!-- ✅ TAMPILKAN FOTO DARI URL YANG BENAR -->
+                                <img src="/api/uploads/artikel/<?= htmlspecialchars($fotoLama) ?>" alt="Foto artikel">
                             <?php endif; ?>
                         </div>
                     </div>
@@ -335,6 +407,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         preview.appendChild(img);
         preview.style.display = 'block';
     }
+    document.addEventListener('DOMContentLoaded', function() {
+    const mainContent = document.getElementById('mainContent');
+
+    // Terapkan fade out saat klik link internal (kecuali logout)
+    document.querySelectorAll('.menu-item a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.href;
+            mainContent.classList.add('fade-out');
+            setTimeout(() => {
+                window.location.href = url;
+            }, 200);
+        });
+    });
+});
 </script>
 </body>
 </html>
