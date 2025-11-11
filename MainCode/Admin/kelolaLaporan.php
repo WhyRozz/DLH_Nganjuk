@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Ambil data laporan
 $stmt = $pdo->query("SELECT * FROM laporan ORDER BY id DESC");
 $laporanList = $stmt->fetchAll();
+$uploadPath = '../../../api/uploads/';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -76,31 +77,75 @@ $laporanList = $stmt->fetchAll();
             cursor: pointer; display: flex; align-items: center; gap: 5px;
             text-decoration: none;
         }
-        .sidebar {
-            width: 250px; background: #e6e6e6;
-            padding: 80px 20px 20px; position: fixed;
-            top: 60px; left: 0; bottom: 0;
-            overflow-y: auto; box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            z-index: 999;
-        }
-        .sidebar-menu { list-style: none; }
-        .menu-item {
-            padding: 15px 20px; margin-bottom: 10px; background: white;
-            border-radius: 10px; display: flex; align-items: center;
-            gap: 10px; text-decoration: none; color: #333;
-        }
-        .menu-item:hover { background: #f0f0f0; }
-        .menu-item.active {
-            background: #2e8b57; color: white; border: 2px solid white;
-        }
-        .menu-icon {
-            width: 30px; height: 30px; background: #2e8b57;
-            color: white; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 16px;
-        }
-        .menu-item.active .menu-icon {
-            background: white; color: #2e8b57;
-        }
+        /* Sidebar */
+		.sidebar {
+    		width: 250px;
+    		background: #e6e6e6;
+    		position: fixed;
+    		top: 60px;
+    		left: 0;
+    		bottom: 0;
+    		padding: 20px 0;
+    		overflow-y: auto;
+    		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    		z-index: 999;
+    		display: flex;
+    		flex-direction: column;
+		}
+
+		.sidebar-menu {
+    		list-style: none;
+    		padding: 0 20px;
+    		margin: 0;
+    		flex: 1;
+		}
+
+		.menu-item {
+    		padding: 14px 20px;
+    		margin-bottom: 8px;
+    		background: white;
+    		border-radius: 10px;
+    		cursor: pointer;
+    		transition: all 0.25s ease;
+    		display: flex;
+    		align-items: center;
+    		gap: 12px;
+    		text-decoration: none;
+    		color: #333;
+    		font-weight: 600;
+    		font-size: 14px;
+    		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		}
+
+		.menu-item:hover {
+    		background: #f0f0f0;
+    		transform: translateX(4px);
+		}
+
+		.menu-item.active {
+    		background: #2e8b57;
+    		color: white;
+    		border: none;
+    		box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
+		}
+
+		.menu-icon {
+    		width: 32px;
+    		height: 32px;
+    		background: #2e8b57;
+    		color: white;
+    		border-radius: 50%;
+    		display: flex;
+    		align-items: center;
+    		justify-content: center;
+    		font-size: 16px;
+    		flex-shrink: 0;
+		}
+
+		.menu-item.active .menu-icon {
+    		background: white;
+    		color: #2e8b57;
+		}
         .main-content {
             flex: 1; margin-left: 250px; padding: 80px 30px 30px;
             background: white;
@@ -133,9 +178,37 @@ $laporanList = $stmt->fetchAll();
         .status-ditolak { background: #f8d7da; color: #721c24; }
         .detail-row { display: none; background: #f9f9f9; padding: 20px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
         .detail-row.active { display: table-row; }
-        .detail-content { display: flex; gap: 20px; flex-wrap: wrap; }
-        .detail-image { flex: 0 0 300px; background: #eee; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .detail-image img { max-width: 100%; max-height: 200px; object-fit: contain; }
+        .detail-content {
+    		display: flex;
+    		gap: 20px;
+    		flex-wrap: wrap;
+    		align-items: flex-start; /* Agar form tidak ikut "naik" saat gambar besar */
+		}
+        .detail-image {
+    		flex: 0 0 400px; /* Lebarkan sedikit */
+    		background: #eee;
+    		border-radius: 8px;
+    		overflow: hidden;
+    		display: flex;
+    		align-items: center;
+    		justify-content: center;
+    		padding: 10px; /* Beri ruang sekitar gambar */
+    		box-sizing: border-box;
+		}
+        .detail-image img {
+    		width: 100%;
+    		height: auto;
+    		max-height: 350px; /* Naikkan batas tinggi */
+    		object-fit: contain;
+    		object-position: center;
+    		border-radius: 8px;
+    		box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    		transition: transform 0.3s ease; /* Efek hover */
+		}
+
+		.detail-image img:hover {
+    		transform: scale(1.05); /* Sedikit membesar saat hover */
+		}
         .detail-form { flex: 1; min-width: 300px; }
         .form-group { margin-bottom: 15px; }
         .form-label { display: block; margin-bottom: 5px; font-size: 14px; color: #555; }
@@ -197,11 +270,25 @@ $laporanList = $stmt->fetchAll();
             .sidebar { width: 200px; padding: 80px 15px 20px; }
             .main-content { margin-left: 200px; }
             .detail-content { flex-direction: column; }
+            .detail-image {
+        		flex: 0 0 100%; /* Gambar penuh lebar di mobile */
+        		max-width: 100%;
+    		}
+    		.detail-image img {
+        		max-height: 250px; /* Batas tinggi lebih kecil di mobile */
+    		}
         }
         @media (max-width: 480px) {
             .sidebar { width: 100%; position: static; height: auto; border-bottom: 2px solid #2e8b57; }
             .main-content { margin-left: 0; padding-top: 100px; }
             .header { position: static; }
+            .detail-image {
+        		flex: 0 0 100%;
+        		max-width: 100%;
+    		}
+    		.detail-image img {
+        		max-height: 200px;
+    		}
         }
     </style>
 </head>
@@ -218,15 +305,41 @@ $laporanList = $stmt->fetchAll();
     <a href="dashboardAdmin.php" class="header-exit"><span>←</span> KELUAR</a>
 </div>
 
+	<!-- Sidebar -->
 <div class="sidebar">
     <ul class="sidebar-menu">
-        <li><a href="dashboardAdmin.php" class="menu-item"><div>Beranda</div></a></li>
-        <li><a href="kelolaLaporan.php" class="menu-item active"><div class="menu-icon">📋</div><div>Kelola Laporan Aduan</div></a></li>
-        <li><a href="kelolaArtikel.php" class="menu-item"><div class="menu-icon">📝</div><div>Kelola Artikel Edukasi</div></a></li>
-        <li><a href="kelolaTPS.php" class="menu-item"><div class="menu-icon">🗑️</div><div>Kelola Informasi TPS</div></a></li>
+        <li>
+            <a href="dashboardAdmin.php" class="menu-item">
+                <div class="menu-icon">📊</div>
+                <div>Beranda</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaLaporan.php" class="menu-item active">
+                <div class="menu-icon">📋</div>
+                <div>Kelola Laporan Aduan</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaArtikel.php" class="menu-item">
+                <div class="menu-icon">📝</div>
+                <div>Kelola Artikel Edukasi</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaTPS.php" class="menu-item">
+                <div class="menu-icon">🗑️</div>
+                <div>Kelola Informasi TPS</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaAkun.php" class="menu-item">
+                <div class="menu-icon">🔐</div>
+                <div>Kelola Akun</div>
+            </a>
+        </li>
     </ul>
 </div>
-
 <div class="main-content">
     <div class="content-header">
         <h2>Kelola Laporan Aduan</h2>
@@ -279,7 +392,7 @@ $laporanList = $stmt->fetchAll();
                         <div class="detail-content">
                             <div class="detail-image">
                                 <?php if (!empty($foto)): ?>
-                                    <img src="uploads/laporan/<?= htmlspecialchars($foto) ?>" alt="Foto Laporan">
+                                    <img src="http://simpelsi.medianewsonline.com/api/uploads/<?= htmlspecialchars($foto) ?>" alt="Foto Laporan">
                                 <?php else: ?>
                                     <img src="https://via.placeholder.com/300x200?text=Tidak+Ada+Foto" alt="Foto tidak tersedia">
                                 <?php endif; ?>
@@ -358,6 +471,21 @@ $laporanList = $stmt->fetchAll();
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const mainContent = document.getElementById('mainContent');
+
+    // Terapkan fade out saat klik link internal (kecuali logout)
+    document.querySelectorAll('.menu-item a').forEach(link => {
+        	link.addEventListener('click', function(e) {
+            	e.preventDefault();
+            	const url = this.href;
+            	mainContent.classList.add('fade-out');
+            	setTimeout(() => {
+                	window.location.href = url;
+            	}, 200);
+        	});
+    	});
+	});
     // LIVE SEARCH
     document.getElementById('searchInput').addEventListener('input', function() {
         const query = this.value.toLowerCase();
