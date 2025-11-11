@@ -78,31 +78,75 @@ $artikelList = $stmt->fetchAll();
             cursor: pointer; display: flex; align-items: center; gap: 5px;
             text-decoration: none;
         }
-        .sidebar {
-            width: 250px; background: #e6e6e6;
-            padding: 80px 20px 20px; position: fixed;
-            top: 60px; left: 0; bottom: 0;
-            overflow-y: auto; box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            z-index: 999;
-        }
-        .sidebar-menu { list-style: none; }
-        .menu-item {
-            padding: 15px 20px; margin-bottom: 10px; background: white;
-            border-radius: 10px; display: flex; align-items: center;
-            gap: 10px; text-decoration: none; color: #333;
-        }
-        .menu-item:hover { background: #f0f0f0; }
-        .menu-item.active {
-            background: #2e8b57; color: white; border: 2px solid white;
-        }
-        .menu-icon {
-            width: 30px; height: 30px; background: #2e8b57;
-            color: white; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 16px;
-        }
-        .menu-item.active .menu-icon {
-            background: white; color: #2e8b57;
-        }
+        /* Sidebar */
+		.sidebar {
+    		width: 250px;
+    		background: #e6e6e6;
+    		position: fixed;
+    		top: 60px;
+    		left: 0;
+    		bottom: 0;
+    		padding: 20px 0;
+    		overflow-y: auto;
+    		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    		z-index: 999;
+    		display: flex;
+    		flex-direction: column;
+		}
+
+		.sidebar-menu {
+    		list-style: none;
+    		padding: 0 20px;
+    		margin: 0;
+    		flex: 1;
+		}
+
+		.menu-item {
+    		padding: 14px 20px;
+    		margin-bottom: 8px;
+    		background: white;
+    		border-radius: 10px;
+    		cursor: pointer;
+    		transition: all 0.25s ease;
+    		display: flex;
+    		align-items: center;
+    		gap: 12px;
+    		text-decoration: none;
+    		color: #333;
+    		font-weight: 600;
+    		font-size: 14px;
+    		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		}
+
+		.menu-item:hover {
+    		background: #f0f0f0;
+    		transform: translateX(4px);
+		}
+
+		.menu-item.active {
+    		background: #2e8b57;
+    		color: white;
+    		border: none;
+    		box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
+		}
+
+		.menu-icon {
+    		width: 32px;
+    		height: 32px;
+    		background: #2e8b57;
+    		color: white;
+    		border-radius: 50%;
+    		display: flex;
+    		align-items: center;
+    		justify-content: center;
+    		font-size: 16px;
+    		flex-shrink: 0;
+		}
+
+		.menu-item.active .menu-icon {
+    		background: white;
+    		color: #2e8b57;
+		}
         .main-content {
             flex: 1; margin-left: 250px; padding: 80px 30px 30px;
             background: white;
@@ -173,16 +217,42 @@ $artikelList = $stmt->fetchAll();
             <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
         </div>
     </div>
-    <a href="dashboardAdmin.php" class="header-exit"><span>←</span> KELUAR</a>
+    <a href="dashboardAdmin.php" class="header-exit"><span>←</span> KEMBALI</a>
 </div>
 
 <!-- Sidebar -->
 <div class="sidebar">
     <ul class="sidebar-menu">
-        <li><a href="dashboardAdmin.php" class="menu-item"><div>Beranda</div></a></li>
-        <li><a href="kelolaLaporan.php" class="menu-item"><div class="menu-icon">📋</div><div>Kelola Laporan Aduan</div></a></li>
-        <li><a href="kelolaArtikel.php" class="menu-item active"><div class="menu-icon">📝</div><div>Kelola Artikel Edukasi</div></a></li>
-        <li><a href="kelolaTPS.php" class="menu-item"><div class="menu-icon">🗑️</div><div>Kelola Informasi TPS</div></a></li>
+        <li>
+            <a href="dashboardAdmin.php" class="menu-item">
+                <div class="menu-icon">📊</div>
+                <div>Beranda</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaLaporan.php" class="menu-item">
+                <div class="menu-icon">📋</div>
+                <div>Kelola Laporan Aduan</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaArtikel.php" class="menu-item active">
+                <div class="menu-icon">📝</div>
+                <div>Kelola Artikel Edukasi</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaTPS.php" class="menu-item">
+                <div class="menu-icon">🗑️</div>
+                <div>Kelola Informasi TPS</div>
+            </a>
+        </li>
+        <li>
+            <a href="kelolaAkun.php" class="menu-item">
+                <div class="menu-icon">🔐</div>
+                <div>Kelola Akun</div>
+            </a>
+        </li>
     </ul>
 </div>
 
@@ -237,5 +307,22 @@ $artikelList = $stmt->fetchAll();
         </a>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mainContent = document.getElementById('mainContent');
+
+    // Terapkan fade out saat klik link internal (kecuali logout)
+    document.querySelectorAll('.menu-item a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.href;
+            mainContent.classList.add('fade-out');
+            setTimeout(() => {
+                window.location.href = url;
+            }, 200);
+        });
+    });
+});
+</script>
 </body>
 </html>
