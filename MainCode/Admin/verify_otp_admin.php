@@ -5,37 +5,59 @@ $password = "katasandi123";
 $dbname = "4698762_simpelsi";
 
 header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
 
-$response = [];
+$data = json_decode(file_get_contents('php://input'));
 
-$json_data = file_get_contents('php://input');
-$data = json_decode($json_data);
-
+// Validasi input
 if (empty($data->email) || empty($data->otp)) {
+    http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Email dan OTP wajib diisi.']);
+    exit();
+}
+
+if (!preg_match('/^\d{4}$/', $data->otp)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'OTP harus 4 digit angka.']);
     exit();
 }
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
+    http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Database error.']);
     exit();
 }
 
-$stmt = $conn->prepare("SELECT id_admin FROM admin WHERE email = ? AND otp = ? AND otp_expires > NOW()");
-$stmt->bind_param("ss", $data->email, $data->otp);
-$stmt->execute();
-$stmt->store_result();
+// ✅ Gunakan UTC secara konsisten
+date_default_timezone_set('UTC');
+$now_utc = gmdate('Y-m-d H:i:s');
 
-if ($stmt->num_rows === 1) {
-    // Bersihkan OTP
+// Cek apakah ada record dengan: email + OTP cocok + belum expired
+$stmt = $conn->prepare("
+    SELECT id_admin 
+    FROM admin 
+    WHERE email = ? 
+      AND otp = ? 
+      AND otp_expires > ?
+");
+$stmt->bind_param("sss", $data->email, $data->otp, $now_utc);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 1) {
+    // ✅ Sukses — HANYA di sini OTP dihapus
     $clear = $conn->prepare("UPDATE admin SET otp = NULL, otp_expires = NULL WHERE email = ?");
     $clear->bind_param("s", $data->email);
     $clear->execute();
     $clear->close();
-    $response = ['status' => 'success', 'message' => 'OTP valid.'];
+    
+    $response = ['status' => 'success', 'message' => 'Login berhasil.'];
 } else {
-    $response = ['status' => 'error', 'message' => 'OTP salah atau kadaluarsa.'];
+    // ❌ Gagal — TIDAK ADA perubahan di database. Hanya kirim error.
+    $response = ['status' => 'error', 'message' => 'Kode OTP salah.'];
 }
 
 $stmt->close();

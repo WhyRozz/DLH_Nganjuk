@@ -1,18 +1,18 @@
 <?php
-// Konfigurasi database
+// Konfigurasi
 $servername = "fdb1034.awardspace.net";
 $username = "4698762_simpelsi";
 $password = "katasandi123";
 $dbname = "4698762_simpelsi";
 $SERVER_EMAIL = 'simpelsi@cucidosa.web.id';
 
+// Header
 header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
-$response = [];
-
+// Input
 $json_data = file_get_contents('php://input');
 $data = json_decode($json_data);
 
@@ -22,14 +22,15 @@ if (empty($data->email)) {
     exit();
 }
 
+// Koneksi
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Database error.']);
+    echo json_encode(['status' => 'error', 'message' => 'Koneksi database gagal.']);
     exit();
 }
 
-// Cek apakah email admin terdaftar
+// Cek email admin
 $stmt = $conn->prepare("SELECT id_admin FROM admin WHERE email = ?");
 $stmt->bind_param("s", $data->email);
 $stmt->execute();
@@ -38,30 +39,36 @@ $stmt->store_result();
 if ($stmt->num_rows === 0) {
     $response = ['status' => 'error', 'message' => 'Email tidak terdaftar sebagai admin.'];
 } else {
-    $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-    $expires = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+    // ✅ Generate 4-digit OTP
+    $otp = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+    
+    // ✅ Gunakan UTC untuk konsistensi
+    date_default_timezone_set('UTC');
+    $expires = gmdate('Y-m-d H:i:s', strtotime('+5 minutes')); // +5 menit dari sekarang (UTC)
 
+    // Simpan ke DB
     $update = $conn->prepare("UPDATE admin SET otp = ?, otp_expires = ? WHERE email = ?");
     $update->bind_param("sss", $otp, $expires, $data->email);
+    
     if ($update->execute()) {
         // Kirim email
         $to = $data->email;
-        $subject = "[SIMPELSI] Kode Verifikasi Admin";
-        $message = "Halo Admin,\n\nKode OTP Anda:\n\n    $otp\n\nBerlaku 5 menit. Jangan bagikan ke siapa pun.";
+        $subject = "[SIMPELSI] Kode Verifikasi Admin (4 Digit)";
+        $message = "Halo Admin,\n\nKode OTP Anda:\n\n    $otp\n\nBerlaku 5 menit. Bisa digunakan berulang kali selama belum kadaluarsa.";
         $headers = "From: SIMPELSI <$SERVER_EMAIL>\r\nReply-To: $SERVER_EMAIL\r\nContent-Type: text/plain; charset=UTF-8";
 
         if (mail($to, $subject, $message, $headers)) {
-            $response = ['status' => 'success', 'message' => 'OTP dikirim ke ' . $data->email];
+            $response = ['status' => 'success', 'message' => 'OTP 4 digit dikirim ke ' . $data->email];
         } else {
-            // Fallback untuk development
+            // 🔧 Mode development — tampilkan OTP (hapus di production!)
             $response = [
                 'status' => 'success_dev',
-                'message' => 'Gagal kirim email. Gunakan kode berikut:',
+                'message' => '[DEV] Email gagal. Gunakan kode berikut (5 menit):',
                 'otp' => $otp
             ];
         }
     } else {
-        $response = ['status' => 'error', 'message' => 'Gagal menyimpan OTP.'];
+        $response = ['status' => 'error', 'message' => 'Gagal menyimpan OTP ke database.'];
     }
     $update->close();
 }
