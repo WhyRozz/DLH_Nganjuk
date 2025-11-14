@@ -2,39 +2,43 @@
 session_start();
 
 // Jika sudah login, langsung ke dashboard
-if (isset($_SESSION['admin_id'])) {
-    header("Location: ../Dashboard/dashboardAdmin.php");
-    exit;
-}
+// if (isset($_SESSION['admin_id'])) {
+//     header("Location: ../Admin/dashboardAdmin.php");
+//     exit;
+// }
 
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (empty($username) || empty($password)) {
-        $error = 'Username dan password wajib diisi.';
+    if (empty($email) || empty($password)) {
+        $error = 'Email dan password wajib diisi.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Format email tidak valid.';
     } else {
         require_once '../KoneksiDatabase/koneksi.php';
 
         try {
-            $stmt = $pdo->prepare("SELECT id_admin, username, password FROM admin WHERE username = ?");
-            $stmt->execute([$username]);
+            // ✅ Cari berdasarkan EMAIL (bukan username)
+            $stmt = $pdo->prepare("SELECT id_admin, email, password FROM admin WHERE email = ?");
+            $stmt->execute([$email]);
             $admin = $stmt->fetch();
 
+            // ✅ Verifikasi: password HARUS plain text (sesuai kebutuhan Anda sebelumnya)
+            // Jika nanti pakai hash, ganti jadi: password_verify($password, $admin['password'])
             if ($admin && $password === $admin['password']) {
                 $_SESSION['admin_id'] = $admin['id_admin'];
-                $_SESSION['admin_username'] = $admin['username'];
+                $_SESSION['admin_email'] = $admin['email']; // simpan email, bukan username
 
-                header("Location: ../Dashboard/dashboardAdmin.php");
+                header("Location: ../Admin/dashboardAdmin.php");
                 exit;
             } else {
-                $error = 'Username atau password salah.';
+                $error = 'Email atau password salah.';
             }
-
         } catch (PDOException $e) {
-            $error = 'Kesalahan database: ' . htmlspecialchars($e->getMessage());
+            $error = 'Kesalahan database: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         }
     }
 }
@@ -42,246 +46,324 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Admin Simpelsi</title>
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        body { 
-            background: #f5f5f5; 
-            min-height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 20px; 
-            position: relative; 
+        body {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        .header { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            background: #095E0D; 
-            padding: 12px 30px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
-            z-index: 10; 
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #2e8b57;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
             color: white;
+            min-height: 60px;
         }
 
-        .header-logo { 
-            width: 40px; 
-            height: 40px; 
-            margin-right: 10px; 
-            border-radius: 50%; 
-            overflow: hidden; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            margin-right: 8px;
+            border-radius: 50%;
+            overflow: hidden;
         }
 
-        .header-title { 
-            font-size: 1.5em; 
-            font-weight: bold; 
+        .header-title {
+            font-size: 1.3em;
+            font-weight: bold;
         }
 
-        .header-title span { 
-            font-size: 0.8em; 
-            font-weight: normal; 
-            display: block; 
+        .header-title span {
+            font-size: 0.75em;
+            font-weight: normal;
+            display: block;
         }
 
-        .exit-btn { 
-            background: white; 
-            color: #095E0D; 
-            padding: 6px 12px; 
-            border-radius: 5px; 
-            font-weight: bold; 
-            text-decoration: none; 
-            display: flex; 
-            align-items: center; 
-            gap: 5px; 
-            transition: all 0.2s ease; 
+        .exit-btn {
+            background: white;
+            color: #2e8b57;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
-        .exit-btn:hover { 
-            background: #e6ffe6; 
-            transform: scale(1.05); 
+        .exit-btn:hover {
+            background: #e6ffe6;
+            transform: scale(1.03);
         }
 
-        .login-container { 
-            display: flex; 
-            gap: 30px; 
-            align-items: center; 
-            background: white; 
-            padding: 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1); 
-            max-width: 1000px; 
-            width: 100%; 
-            margin-top: 80px; 
+        /* CARD LOGIN */
+        .login-card {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            margin-top: 80px;
         }
 
-        .login-card { 
-            background: #095E0D; 
-            padding: 35px 40px; 
-            border-radius: 20px; 
-            width: 100%; 
-            max-width: 400px; 
-            text-align: center; 
-            color: white; 
+        .login-form-section {
+            flex: 1;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .login-title { 
-            font-size: 26px; 
-            font-weight: bold; 
-            margin-bottom: 10px; 
-            line-height: 1.2; 
+        .login-image-section {
+            flex: 1;
+            min-width: 250px;
+            background: #f8fdf9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        .login-subtitle { 
-            font-size: 22px; 
-            font-weight: normal; 
-            margin-bottom: 25px; 
+        .login-image-section img {
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: 16px;
+            object-fit: cover;
+            box-shadow: 0 8px 20px rgba(46, 139, 87, 0.15);
         }
 
-        .form-group { 
-            text-align: left; 
-            margin-bottom: 20px; 
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
         }
 
-        label { 
-            display: block; 
-            margin-bottom: 6px; 
-            font-weight: 600; 
-            color: white; 
-            font-size: 14px; 
+        .login-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2e8b57;
+            margin-bottom: 5px;
         }
 
-        input[type="text"], 
-        input[type="password"] { 
-            width: 100%; 
-            padding: 12px 15px; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            background: white; 
-            color: #333; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-            transition: all 0.3s ease; 
+        .login-subtitle {
+            font-size: 18px;
+            color: #226b42;
+            font-weight: 600;
         }
 
-        input:focus { 
-            outline: none; 
-            box-shadow: 0 2px 12px rgba(32, 167, 38, 0.3); 
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
         }
 
-        .btn-login { 
-            background: #20A726; 
-            color: white; 
-            border: none; 
-            width: 100%; 
-            padding: 12px; 
-            border-radius: 10px; 
-            font-size: 18px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            margin-bottom: 15px; 
-            transition: all 0.3s ease; 
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2e8b57;
+            font-size: 14px;
         }
 
-        .btn-login:hover { 
-            background: #1d9323; 
-            transform: scale(1.02); 
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
         }
 
-        .btn-reset { 
-            background: white; 
-            color: #095E0D; 
-            border: 2px solid #20A726; 
-            width: 100%; 
-            padding: 10px; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
+        input:focus {
+            outline: none;
+            border-color: #2e8b57;
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
         }
 
-        .btn-reset:hover { 
-            background: #e6ffe6; 
-            color: #095E0D; 
-            transform: scale(1.02); 
+        .btn-login {
+            background: #2e8b57;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(46, 139, 87, 0.2);
         }
 
-        .alert { 
-            padding: 10px; 
-            border-radius: 8px; 
-            margin-top: 20px; 
-            font-weight: 600; 
-            animation: fadeInUp 0.6s ease; 
-            background: #f8d7da; 
-            color: #721c24; 
-            border: 1px solid #f5c6cb; 
+        .btn-login:hover {
+            background: #226b42;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(46, 139, 87, 0.3);
         }
 
-        @keyframes fadeInUp { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
+        .btn-reset {
+            background: transparent;
+            color: #2e8b57;
+            border: 2px solid #2e8b57;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .illustration { 
-            flex: 1; 
-            min-width: 300px; 
-            text-align: center; 
+        .btn-reset:hover {
+            background: rgba(46, 139, 87, 0.05);
         }
 
-        .illustration img { 
-            max-width: 100%; 
-            height: auto; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        .alert {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 600;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            animation: fadeInUp 0.5s ease;
         }
 
-        @media (max-width: 768px) { 
-            .login-container { 
-                flex-direction: column; 
-                padding: 20px; 
-            } 
-            .illustration { 
-                order: -1; 
-            } 
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* RESPONSIF: MOBILE */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 16px;
+                min-height: 56px;
+            }
+
+            .header-logo {
+                width: 32px;
+                height: 32px;
+                margin-right: 6px;
+            }
+
+            .header-title {
+                font-size: 1.2em;
+            }
+
+            .header-title span {
+                font-size: 0.7em;
+            }
+
+            .exit-btn {
+                padding: 5px 10px;
+                font-size: 13px;
+                gap: 4px;
+            }
+
+            .header>div:first-child {
+                margin-right: 10px;
+            }
+
+            .login-card {
+                margin-top: 100px;
+                flex-direction: column;
+            }
+
+            .login-form-section {
+                padding: 30px 20px;
+            }
+
+            .login-image-section {
+                padding: 15px;
+                order: -1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .login-image-section img {
+                max-height: 220px;
+                max-width: 100%;
+                border-radius: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                max-width: 100%;
+            }
+
+            .login-form-section {
+                padding: 25px 15px;
+            }
+
+            .login-image-section {
+                padding: 10px;
+            }
+
+            .login-image-section img {
+                max-height: 180px;
+            }
         }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <div class="header">
         <div style="display: flex; align-items: center;">
-            <!-- GANTI PATH INI SESUAI ASET ANDA -->
-            <!-- Contoh: "../assets/logo_ad.jpg" atau "../img/logo.png" -->
             <img src="../../assets/logo.jpg" alt="Logo Simpelsi" class="header-logo">
             <div class="header-title">
                 Dashboard<br><span>ADMIN</span>
             </div>
         </div>
-        <a href="../index.php" class="exit-btn">← EXIT</a>
+        <a href="../dashboard.php" class="exit-btn">← EXIT</a>
     </div>
 
-    <!-- Login Container -->
-    <div class="login-container">
-        <!-- Login Card -->
-        <div class="login-card">
-            <div class="login-title">LOGIN ADMIN</div>
-            <div class="login-subtitle">Simpelsi</div>
+    <!-- 1 CARD LOGIN -->
+    <div class="login-card">
+        <!-- Bagian Form -->
+        <div class="login-form-section">
+            <div class="login-header">
+                <div class="login-title">LOGIN ADMIN</div>
+                <div class="login-subtitle">Simpelsi</div>
+            </div>
 
             <?php if (!empty($error)): ?>
                 <div class="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
@@ -289,41 +371,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="POST" id="loginForm">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required autocomplete="off" />
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" 
+                           value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                           required autocomplete="off" />
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" required />
                 </div>
                 <button type="submit" class="btn-login">Login</button>
-                <button type="button" class="btn-reset" onclick="resetForm()">Reset Password?</button>
+                <button type="button" class="btn-reset" onclick="resetForm()">Reset Form</button>
             </form>
         </div>
 
-        <!-- Ilustrasi -->
-        <div class="illustration">
-            <!-- GANTI PATH INI SESUAI ASET ANDA -->
-            <!-- Contoh: "../assets/login_illustration.png" -->
-            <!-- Jika tidak pakai ilustrasi, hapus bagian ini -->
-            <img src="../../assets/Login.jpg" alt="Ilustrasi Login" style="max-width: 300px;">
+        <!-- Bagian Gambar -->
+        <div class="login-image-section">
+            <img src="../../assets/Login.jpg" alt="Ilustrasi Login">
         </div>
     </div>
 
     <script>
         function resetForm() {
             document.getElementById('loginForm').reset();
-            document.getElementById('username').focus();
+            document.getElementById('email').focus();
         }
-
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('focus', () => {
-                input.parentElement.style.transform = 'translateX(5px)';
-            });
-            input.addEventListener('blur', () => {
-                input.parentElement.style.transform = 'translateX(0)';
-            });
-        });
     </script>
 </body>
+
 </html>
