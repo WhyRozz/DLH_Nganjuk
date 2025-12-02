@@ -1,11 +1,15 @@
+<?php
+// Tidak perlu session — ini halaman publik
+?>
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMPELSI - Portofolio Interaktif</title>
+    <title>SIMPELSI - Dashboard Umum</title>
     <style>
+        /* =============== RESET & GLOBAL STYLES =============== */
         * {
             margin: 0;
             padding: 0;
@@ -21,25 +25,11 @@
             min-height: 100vh;
         }
 
-        .section {
-            height: auto;
-            min-height: 100vh;
-            width: 100%;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background: white;
-            flex: 1;
-        }
-
-        /* Navbar */
-        .navbar {
-            background: linear-gradient(to right, #20A726, #095E0D);
+        /* =============== NAVBAR DESKTOP STYLES (Hanya Tampil di Desktop) =============== */
+        .navbar-desktop {
+            background: #2e8b57;
             color: white;
-            padding: 12px 30px;
+            padding: 12px 20px;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -51,96 +41,268 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .nav-logo {
+        .nav-logo-container {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-weight: bold;
         }
 
-        .nav-logo img {
+        .nav-logo {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #2e8b57;
+        }
+
+        .nav-logo img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             object-fit: cover;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: bold;
         }
 
         .nav-menu {
             display: flex;
             gap: 20px;
+            align-items: center;
         }
 
-        .nav-menu a {
+        .nav-menu a,
+        .nav-menu .nav-login {
             color: white;
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
-            transition: color 0.2s;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s;
+            text-align: center;
+            white-space: nowrap;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .nav-menu a:hover {
-            color: #ffeb3b;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0f0e9;
         }
 
-        .nav-login {
-            background: linear-gradient(to right, #20A726, #095E0D);
-            padding: 6px 12px;
+        .nav-menu .nav-login {
+            background: #ff6347;
+            color: white;
+            padding: 8px 16px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid white;
         }
 
-        .nav-login:hover {
-            background: linear-gradient(to right, #095E0D, #20A726);
-            transform: scale(1.05);
+        .nav-menu .nav-login:hover {
+            background: #ff4500;
         }
 
-        /* Konten utama */
-        .content {
-            max-width: 1000px;
+        /* =============== NAVBAR MOBILE STYLES (Versi Final - Lebih Besar & Tidak Ada Celah) =============== */
+        .navbar-mobile {
+            background: #2e8b57;
+            color: white;
+            padding: 18px 20px; /* Lebih tinggi */
             width: 100%;
-            margin-top: 80px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: 70px; /* Tinggi lebih besar */
+        }
+
+        .nav-mobile-menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .nav-mobile-menu-btn span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: white;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .nav-mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+        .nav-mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .nav-mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        /* Menu slide-in dari kanan, ukuran lebih besar, tanpa celah */
+        .nav-mobile-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 320px; /* Lebih lebar */
+            height: 100vh;
+            background: linear-gradient(135deg, #2e8b57, #1e6b3f);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            padding-top: 90px; /* Agar tidak tertutup navbar */
+            padding-bottom: 20px; /* Agar tidak terlalu ketat di bawah */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+
+            /* Sembunyikan sepenuhnya saat tidak aktif */
+            transform: translateX(100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease, visibility 0.3s;
+        }
+
+        .nav-mobile-menu.active {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-mobile-menu a,
+        .nav-mobile-menu .nav-login {
+            color: white;
+            text-decoration: none;
+            padding: 16px 30px; /* Lebih lega */
+            font-size: 16px;
+            font-weight: 500;
+            display: block;
+            transition: background 0.2s, transform 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-mobile-menu a:hover,
+        .nav-mobile-menu .nav-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid white;
+            transform: translateX(5px);
+        }
+
+        .nav-mobile-menu .nav-login {
+            background: #ff6347;
+            margin: 25px 30px;
+            text-align: center;
+            border-radius: 25px;
+            font-weight: bold;
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+
+        /* Overlay untuk tutup menu saat klik di luar */
+        .nav-mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* =============== SECTION STYLES =============== */
+        .section {
+            min-height: 100vh;
+            width: 100%;
+            padding: clamp(30px, 5vw, 60px) clamp(15px, 4vw, 40px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: white;
+        }
+
+        /* Padding-top untuk menghindari konten tertutup navbar */
+        .section {
+            padding-top: 80px; /* Default tinggi navbar + jarak */
+        }
+
+        /* Di mobile, tinggi navbar lebih kecil */
+        @media (max-width: 768px) {
+            .section {
+                padding-top: 70px; /* Sesuaikan dengan tinggi navbar di mobile */
+            }
+        }
+
+        /* =============== KONTEN UTAMA =============== */
+        .content {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            margin-top: 0;
         }
 
         h1 {
-            color: #095E0D;
-            margin-bottom: 15px;
-            font-size: 28px;
+            color: #2e8b57;
+            margin-bottom: 20px;
+            font-size: clamp(20px, 4vw, 28px);
         }
 
         p {
             line-height: 1.6;
             margin-bottom: 20px;
             color: #333;
+            font-size: clamp(14px, 1.8vw, 16px);
         }
 
-        .btn-green,
-        .download-btn {
-            background: linear-gradient(to right, #20A726, #095E0D);
+        .btn-green {
+            background: #2e8b57;
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 25px;
             text-decoration: none;
             font-weight: bold;
             display: inline-block;
             margin-top: 15px;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 4px 8px rgba(9, 94, 13, 0.3);
+            transition: background 0.2s;
+            font-size: clamp(13px, 1.8vw, 15px);
         }
 
-        .btn-green:hover,
-        .download-btn:hover {
-            background: linear-gradient(to right, #095E0D, #20A726);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(9, 94, 13, 0.4);
+        .btn-green:hover {
+            background: #226b42;
         }
 
-        /* Home Section */
+        /* =============== HOME SECTION =============== */
         .home-content {
             display: flex;
             align-items: center;
@@ -171,7 +333,7 @@
             display: block;
         }
 
-        /* Profil Section */
+        /* =============== PROFIL SECTION =============== */
         .profil-content {
             display: flex;
             align-items: center;
@@ -185,31 +347,43 @@
         }
 
         .profil-logo {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
             min-width: 300px;
+        }
+
+        .logo-large-container {
+            width: 100%;
             text-align: center;
         }
 
-        .profil-logo img:first-child {
-            max-width: 250px;
+        .logo-large {
+            max-width: clamp(130px, 20vw, 250px);
             height: auto;
             border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .profil-logo img:last-child {
-            width: 70px;
-            height: 40px;
-            margin-top: 15px;
+        .logo-small-container {
+            margin-top: -10px;
+            margin-left: 5px;
         }
 
-        /* Visi & Misi */
+        .logo-small {
+            width: clamp(35px, 8vw, 70px);
+            height: auto;
+        }
+
+        /* =============== VISI & MISI SECTION =============== */
         .visimisi-content {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            padding: 0 10px;
+            gap: 20px;
+            padding: 0 20px;
             width: 100%;
         }
 
@@ -223,21 +397,21 @@
 
         .visimisi-column {
             flex: 1;
-            min-width: 300px;
+            min-width: 280px;
             background: #f9f9f9;
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #095E0D;
+            border-left: 4px solid #2e8b57;
         }
 
         .visimisi-column h2 {
-            color: #095E0D;
-            font-size: 22px;
+            color: #2e8b57;
+            font-size: clamp(18px, 3vw, 22px);
             margin-bottom: 15px;
         }
 
-        /* Fitur Section */
+        /* =============== FITUR SECTION =============== */
         .features {
             display: flex;
             gap: 20px;
@@ -247,20 +421,20 @@
         }
 
         .feature-card {
-            background: #f0f9f0;
+            background: #e6f2e6;
             padding: 20px;
             border-radius: 12px;
-            width: 250px;
+            width: 100%;
+            max-width: 300px;
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            border-top: 3px solid #20A726;
         }
 
         .feature-icon {
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 100px;
             margin: 0 auto 15px;
-            background: linear-gradient(to right, #20A726, #095E0D);
+            /*background: #2e8b57;*/
             color: white;
             border-radius: 50%;
             display: flex;
@@ -270,46 +444,75 @@
         }
 
         .feature-icon img {
-            width: 40px;
-            height: 40px;
-            filter: invert(1);
+            width: 100px;
+            height: 100px;
         }
 
         .feature-title {
             font-size: 16px;
-            color: #095E0D;
+            color: #2e8b57;
             margin-bottom: 10px;
             font-weight: bold;
         }
 
-        /* Jenis Sampah */
-        .waste-types {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        /* =============== JENIS SAMPAH SECTION =============== */
+        .waste-types-container {
+            display: flex;
             gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
             margin-top: 30px;
         }
 
-        .waste-item {
-            background: #f0f9f0;
+        .waste-category {
+            background: #e6e6e6;
             padding: 20px;
             border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
             text-align: center;
-            border: 1px solid #20A726;
+        }
+
+        .waste-category-title {
+            color: #2e8b57;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .waste-items {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .waste-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
         }
 
         .waste-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-            color: #095E0D;
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #2e8b57;
         }
 
         .waste-name {
             font-weight: bold;
-            color: #095E0D;
+            color: #2e8b57;
+            font-size: 12px;
         }
 
-        /* Download Section */
+        /* =============== DOWNLOAD SECTION =============== */
         .download-section-content {
             display: flex;
             flex-direction: column;
@@ -324,15 +527,45 @@
             max-width: 600px;
         }
 
-        /* === FOOTER BAWAH BARU === */
-        .footer-bottom {
-            background: linear-gradient(to right, #095E0D, #053a08);
+        .download-btn {
+            background: #2e8b57;
             color: white;
-            padding: 40px 20px;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: #226b42;
+        }
+
+        /* =============== ANIMASI =============== */
+        @keyframes waveImage {
+            0% {
+                transform: scaleY(1) skewY(0deg);
+            }
+            50% {
+                transform: scaleY(1.03) skewY(3deg);
+            }
+            100% {
+                transform: scaleY(1) skewY(0deg);
+            }
+        }
+
+        /* =============== FOOTER BAWAH =============== */
+        .footer-bottom {
+            background: #004d26;
+            color: white;
+            padding: 30px 20px;
             margin-top: 40px;
             opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
             position: relative;
             z-index: 5;
         }
@@ -370,7 +603,7 @@
 
         .footer-col .copyright {
             font-size: 12px;
-            opacity: 0.9;
+            opacity: 0.8;
             margin-top: 15px;
         }
 
@@ -392,7 +625,7 @@
         }
 
         .footer-col ul li a:hover {
-            color: #20A726;
+            color: #ffeb3b;
         }
 
         .social-icons {
@@ -407,67 +640,136 @@
             filter: brightness(0) invert(1);
         }
 
+        /* =============== RESPONSIVE UNTUK TABLET & HP =============== */
         @media (max-width: 768px) {
-            .footer-container {
-                flex-direction: column;
-                gap: 20px;
+            /* Sembunyikan navbar desktop */
+            .navbar-desktop {
+                display: none;
             }
 
-            .footer-col {
-                min-width: 100%;
+            /* Tampilkan navbar mobile */
+            .navbar-mobile {
+                display: flex;
             }
 
-            .footer-bottom {
-                padding: 30px 15px;
+            .nav-mobile-menu.active {
+                display: flex;
             }
 
-            .footer-col h3 {
+            .nav-logo-container {
+                order: 1;
+            }
+
+            .nav-mobile-menu-btn {
+                order: 2;
+            }
+
+            .nav-mobile-menu {
+                right: 0px;
+            }
+
+            .navbar-mobile {
+                padding: 10px 15px;
+            }
+
+            .nav-logo {
+                width: 30px;
+                height: 30px;
+            }
+
+            .nav-title {
                 font-size: 16px;
             }
 
-            .footer-col p {
-                font-size: 13px;
+            .content {
+                padding: 20px;
             }
 
-            .social-icons a img {
-                width: 20px;
-                height: 20px;
+            .home-content, .profil-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .home-image, .profil-logo {
+                order: -1;
+            }
+
+            .waste-types-container {
+                flex-direction: column;
+            }
+
+            .waste-category {
+                max-width: 100%;
             }
         }
 
-        /* Animasi */
-        @keyframes waveImage {
-            0% { transform: scaleY(1) skewY(0deg); }
-            50% { transform: scaleY(1.03) skewY(3deg); }
-            100% { transform: scaleY(1) skewY(0deg); }
-        }
+        @media (max-width: 480px) {
+            .navbar-mobile {
+                padding: 8px;
+            }
 
-        html { scroll-behavior: smooth; }
+            .nav-logo {
+                width: 24px;
+                height: 24px;
+            }
 
-        @media (max-width: 768px) {
-            .nav-menu { gap: 10px; font-size: 12px; }
-            .content { padding: 20px; }
-            .feature-card { width: 100%; }
+            .nav-title {
+                font-size: 14px;
+            }
+
+            .nav-mobile-menu {
+                width: 180px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
-    <div class="navbar">
-        <div class="nav-logo">
-            <img src="/assets/logo.jpg" alt="Logo SIMPELSI">
-            <span>SIMPELSI</span>
+    <!-- Navbar Desktop -->
+    <div class="navbar-desktop">
+        <div class="nav-logo-container">
+            <div class="nav-logo">
+                <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/logo.jpg" alt="Logo SIMPELSI">
+            </div>
+            <div class="nav-title">SimpelSi</div>
         </div>
         <div class="nav-menu">
             <a href="#home">Beranda</a>
             <a href="#profil">Profil</a>
             <a href="#fitur">Fitur</a>
             <a href="#jenis">Jenis Sampah</a>
-            <a href="#main-footer" id="report-link">Pengaduan Laporan</a>
+            <a href="#download">Pengaduan Laporan</a>
+            <div class="nav-login" id="loginBtnDesktop">Login</div>
         </div>
-        <div class="nav-login" id="loginBtn">LOGIN</div>
     </div>
+
+    <!-- Navbar Mobile -->
+    <div class="navbar-mobile">
+        <div class="nav-logo-container">
+            <div class="nav-logo">
+                <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/logo.jpg" alt="Logo SIMPELSI">
+            </div>
+        <div class="nav-title">SimpelSi</div>
+        </div>
+        <button class="nav-mobile-menu-btn" id="mobileMenuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+
+    <!-- Menu Mobile (Slide dari kanan) -->
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="#home">Beranda</a>
+        <a href="#profil">Profil</a>
+        <a href="#fitur">Fitur</a>
+        <a href="#jenis">Jenis Sampah</a>
+        <a href="#download">Pengaduan Laporan</a>
+        <div class="nav-login" id="loginBtnMobile">Login</div>
+    </div>
+
+    <!-- Overlay untuk menutup menu -->
+    <div class="nav-mobile-overlay" id="mobileOverlay"></div>
 
     <!-- Home -->
     <div class="section" id="home">
@@ -480,27 +782,31 @@
                 <a href="#profil" class="btn-green">Mulai</a>
             </div>
             <div class="home-image">
-                <img src="/assets/banner.png" alt="Ilustrasi SIMPELSI">
+                <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/banner.png" alt="banner SIMPELSI">
             </div>
         </div>
     </div>
 
     <!-- Profil -->
-<div class="section" id="profil">
-    <div class="content profil-content">
-        <div class="profil-text">
-            <h1>Profil</h1>
-            <p>
-                Dinas Lingkungan Hidup merupakan instansi pemerintah yang bertugas membantu kepala daerah dalam melaksanakan urusan pemerintahan di bidang lingkungan hidup yang menjadi kewenangan Daerah dan tugas pembantuan yang diberikan pada Daerah sesuai dengan visi, misi dan program Walikota ekologisasi wilayah dalam Rencana Pembangunan Jangka Menengah Daerah.
-            </p>
-            <a href="#visimisi" class="btn-green">Baca Visi & Misi →</a>
-        </div>
-        <div class="profil-logo" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-            <img src="/assets/logo_dlh.jpg" alt="Logo DLH" style="max-width: 250px; height: auto; border-radius: 50%;">
-            <img src="/assets/Dlh.png" alt="Logo DLH Kecil" style="width: 70px; height: 40px;">
+    <div class="section" id="profil">
+        <div class="content profil-content">
+            <div class="profil-text">
+                <h1>Profil</h1>
+                <p>
+                    Dinas Lingkungan Hidup merupakan instansi pemerintah yang bertugas membantu kepala daerah dalam melaksanakan urusan pemerintahan di bidang lingkungan hidup yang menjadi kewenangan Daerah dan tugas pembantuan yang diberikan pada Daerah sesuai dengan visi, misi dan program Walikota ekologisasi wilayah dalam Rencana Pembangunan Jangka Menengah Daerah.
+                </p>
+                <a href="#visimisi" class="btn-green">Baca Visi & Misi →</a>
+            </div>
+            <div class="profil-logo">
+                <div class="logo-large-container">
+                    <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/logo_dlh.jpg" alt="Logo Dinas Lingkungan Hidup" class="logo-large">
+                </div>
+                <div class="logo-small-container">
+                    <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/Dlh.png" alt="DLH" class="logo-small">
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Visi & Misi -->
     <div class="section" id="visimisi">
@@ -525,7 +831,7 @@
                 </div>
             </div>
             <div style="text-align: center; margin-top: 20px; width: 100%;">
-                <a href="#main-footer" class="download-btn" style="padding: 12px 24px; font-size: 16px;">Download APK →</a>
+                <a href="#main-footer" class="download-btn">Download APK →</a>
             </div>
         </div>
     </div>
@@ -537,17 +843,17 @@
             <p>Inovasi Fitur SIMPELSI</p>
             <div class="features">
                 <div class="feature-card">
-                    <div class="feature-icon"><img src="/assets/lapor_sampah.png" alt=""></div>
+                    <div class="feature-icon"><img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/lapor_sampah.png" alt="Lapor Sampah"></div>
                     <div class="feature-title">LAPOR SAMPAH ILEGAL</div>
                     <p>Bagikan foto sampah ke Aplikasi Simpelsi, dan arahkan letak sampah yang ada di sekitarmu.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon"><img src="/assets/informasi_tps.png" alt=""></div>
+                    <div class="feature-icon"><img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/informasi_tps.png" alt="Informasi TPS"></div>
                     <div class="feature-title">INFORMASI LOKASI TPS</div>
                     <p>Simpelsi memudahkan informasi tempat tertang lokasi TPS Di Kabupaten Negara.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon"><img src="/assets/artikel_edukasi.png" alt=""></div>
+                    <div class="feature-icon"><img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/artikel_edukasi.png" alt="Artikel Edukasi"></div>
                     <div class="feature-title">ARTIKEL EDUKASI</div>
                     <p>Menemukan pengumpulan sampah EcoSorted terdekat di wilayahmu.</p>
                 </div>
@@ -560,79 +866,90 @@
         <div class="content">
             <h1>JENIS SAMPAH</h1>
             <p>Berbagai jenis sampah yang dapat dilaporkan</p>
-            <div class="waste-types">
-                <div class="waste-item">
-                    <div class="waste-icon">📄</div>
-                    <div class="waste-name">Kertas</div>
+            <div class="waste-types-container">
+                <!-- Organik -->
+                <div class="waste-category">
+                    <div class="waste-category-title">Organik</div>
+                    <div class="waste-items">
+                        <div class="waste-item">
+                            <div class="waste-icon">📄</div>
+                            <div class="waste-name">Kertas</div>
+                        </div>
+                        <div class="waste-item">
+                            <div class="waste-icon">📦</div>
+                            <div class="waste-name">Kardus</div>
+                        </div>
+                        <div class="waste-item">
+                            <div class="waste-icon">🍎</div>
+                            <div class="waste-name">Buah & Sayur</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="waste-item">
-                    <div class="waste-icon">🥤</div>
-                    <div class="waste-name">Plastik</div>
-                </div>
-                <div class="waste-item">
-                    <div class="waste-icon">📦</div>
-                    <div class="waste-name">Kardus</div>
-                </div>
-                <div class="waste-item">
-                    <div class="waste-icon">🍷</div>
-                    <div class="waste-name">Kaca</div>
-                </div>
-                <div class="waste-item">
-                    <div class="waste-icon">⚙️</div>
-                    <div class="waste-name">Logam</div>
-                </div>
-                <div class="waste-item">
-                    <div class="waste-icon">🌿</div>
-                    <div class="waste-name">Organik</div>
-                </div>
-                <div class="waste-item">
-                    <div class="waste-icon">🗑️</div>
-                    <div class="waste-name">Lainnya</div>
+
+                <!-- Non-Organik -->
+                <div class="waste-category">
+                    <div class="waste-category-title">Non-Organik</div>
+                    <div class="waste-items">
+                        <div class="waste-item">
+                            <div class="waste-icon">⚙️</div>
+                            <div class="waste-name">Logam</div>
+                        </div>
+                        <div class="waste-item">
+                            <div class="waste-icon">🥤</div>
+                            <div class="waste-name">Plastik</div>
+                        </div>
+                        <div class="waste-item">
+                            <div class="waste-icon">🍷</div>
+                            <div class="waste-name">Kaca</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-   <!-- Download -->
-<div class="section" id="download" style="min-height: auto; padding: 30px 20px;">
-    <div class="content" style="max-width: 800px; text-align: center;">
-        <h1>Download Aplikasi</h1>
-        <p style="margin: 12px 0 24px;">
-            Simpelsi adalah platform yang memudahkan pelaporan sampah ilegal dengan perangkat mobile/smartphone yang bisa diakses online.
-        </p>
-        <a href="#main-footer" class="download-btn">DOWNLOAD APK</a>
+    <!-- Download -->
+    <div class="section" id="download">
+        <div class="content download-section-content">
+            <div class="download-text">
+                <h1>Download Aplikasi</h1>
+                <p>Simpelsi adalah platform yang memudahkan pelaporan sampah ilegal dengan perangkat mobile/smartphone yang bisa diakses online.</p>
+                <a href="https://drive.google.com/file/d/1UUpHtV3YaXyPhQ66u8JV91WJKXivf5Oh/view?usp=sharing" class="download-btn">UNDUH APK</a>
+            </div>
+        </div>
     </div>
-</div>
 
     <!-- FOOTER BAWAH -->
     <footer id="main-footer" class="footer-bottom">
         <div class="footer-container">
             <div class="footer-col">
                 <h3>Simpelsi</h3>
-                <p>Berawal dari foto, Berakhir pada Kelestarian. Langkah kecil memberikan dampak besar pada pelestarian lingkungan.</p>
-                <p class="copyright">©2025 Simpelsi All rights reserved.</p>
+                <h5>Berawal dari foto, Berakhir pada Kelestarian. Langkah kecil memberikan dampak besar pada pelestarian lingkungan.</h5>
+                <h5 class="copyright">©2025 Simpelsi All rights reserved.</h5>
             </div>
 
             <div class="footer-col">
-                <h3>Menu</h3>
+                <h3>Simpelsi</h3>
                 <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#profil">Informasi</a></li>
-                    <li><a href="#fitur">Layanan</a></li>
+                    <li><a href="#home">Beranda</a></li>
+                    <li><a href="#profil">Profil</a></li>
+                    <li><a href="#fitur">Fitur</a></li>
+                    <li><a href="#jenis">Jenis Sampah</a></li>
+                    <li><a href="#download">Download</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h3>Social Media</h3>
                 <div class="social-icons">
-                    <a href="#" aria-label="Instagram">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png  " alt="Instagram" width="24">
+                    <a href="https://www.instagram.com/dlhnganjuk/" aria-label="Instagram">
+                        <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/instagram.png" alt="Instagram" width="24">
                     </a>
-                    <a href="#" aria-label="Facebook">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png  " alt="Facebook" width="24">
+                    <a href="https://www.facebook.com/profile.php?id=100076050218713" aria-label="Facebook">
+                        <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/facebook.png" alt="Facebook" width="24">
                     </a>
-                    <a href="#" aria-label="YouTube">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174856.png  " alt="YouTube" width="24">
+                    <a href="https://www.youtube.com/@dlhbisa" aria-label="YouTube">
+                        <img src="https://simpelsi.pbltifnganjuk.com/WEB/assets/—Pngtree—youtube logo png_3733302.png" alt="YouTube" width="24">
                     </a>
                 </div>
             </div>
@@ -640,48 +957,69 @@
     </footer>
 
     <script>
-        // Smooth scroll untuk semua link internal
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
+        // Toggle Mobile Menu & Overlay
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileMenu.classList.toggle('active');
+            mobileOverlay.classList.toggle('active');
+            mobileMenuBtn.classList.toggle('active');
+        });
+
+        mobileOverlay.addEventListener('click', function() {
+            mobileMenu.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            mobileMenuBtn.classList.remove('active');
+        });
+
+        // Tutup menu saat klik link
+        document.querySelectorAll('#mobileMenu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                mobileOverlay.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
             });
         });
 
-        // Login redirect
-        document.getElementById('loginBtn').addEventListener('click', function() {
-            window.location.href = 'login/login.php';
+        // Login redirect for mobile
+        document.getElementById('loginBtnMobile')?.addEventListener('click', function() {
+            window.location.href = 'Admin/login.php';
         });
 
-        // Animasi footer: muncul saat terlihat di viewport
+        // Login redirect for desktop
+        document.getElementById('loginBtnDesktop')?.addEventListener('click', function() {
+            window.location.href = 'Admin/login.php';
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Animasi Footer: Muncul saat scroll ke bawah
         const footer = document.getElementById('main-footer');
 
         function checkFooterVisibility() {
-            const rect = footer.getBoundingClientRect();
+            const footerRect = footer.getBoundingClientRect();
             const windowHeight = window.innerHeight;
-            if (rect.top <= windowHeight * 0.9) {
+
+            if (footerRect.top <= windowHeight * 0.9) {
                 footer.classList.add('visible');
             }
         }
 
-        // Pastikan animasi jalan saat di-scroll ke footer via klik
-        function forceFooterVisible() {
-            setTimeout(() => {
-                footer.classList.add('visible');
-            }, 300);
-        }
-
         window.addEventListener('scroll', checkFooterVisibility);
         window.addEventListener('load', checkFooterVisibility);
-
-        // Saat klik link ke footer → pastikan animasi muncul
-        document.querySelectorAll('a[href="#main-footer"]').forEach(link => {
-            link.addEventListener('click', forceFooterVisible);
-        });
-        
     </script>
 </body>
 
