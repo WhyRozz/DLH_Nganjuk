@@ -10,30 +10,35 @@ session_start();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (empty($username) || empty($password)) {
-        $error = 'Username dan password wajib diisi.';
+    if (empty($email) || empty($password)) {
+        $error = 'Email dan password wajib diisi.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Format email tidak valid.';
     } else {
         require_once '../KoneksiDatabase/koneksi.php';
 
         try {
-            $stmt = $pdo->prepare("SELECT id_admin, username, password FROM admin WHERE username = ?");
-            $stmt->execute([$username]);
+            // ✅ Cari berdasarkan EMAIL (bukan username)
+            $stmt = $pdo->prepare("SELECT id_admin, email, password FROM admin WHERE email = ?");
+            $stmt->execute([$email]);
             $admin = $stmt->fetch();
 
+            // ✅ Verifikasi: password HARUS plain text (sesuai kebutuhan Anda sebelumnya)
+            // Jika nanti pakai hash, ganti jadi: password_verify($password, $admin['password'])
             if ($admin && $password === $admin['password']) {
                 $_SESSION['admin_id'] = $admin['id_admin'];
-                $_SESSION['admin_username'] = $admin['username'];
+                $_SESSION['admin_email'] = $admin['email']; // simpan email, bukan username
 
                 header("Location: ../Admin/dashboardAdmin.php");
                 exit;
             } else {
-                $error = 'Username atau password salah.';
+                $error = 'Email atau password salah.';
             }
         } catch (PDOException $e) {
-            $error = 'Kesalahan database: ' . htmlspecialchars($e->getMessage());
+            $error = 'Kesalahan database: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         }
     }
 }
@@ -71,20 +76,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
             background: #2e8b57;
             padding: 12px 20px;
+<<<<<<< HEAD
             /* kurangi padding horizontal */
+=======
+>>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             display: flex;
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 10;
             color: white;
+<<<<<<< HEAD
             /* Tinggi responsif */
+=======
+>>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             min-height: 60px;
         }
 
         .header-logo {
             width: 36px;
+<<<<<<< HEAD
             /* sedikit lebih kecil */
+=======
+>>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             height: 36px;
             margin-right: 8px;
             border-radius: 50%;
@@ -93,7 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .header-title {
             font-size: 1.3em;
+<<<<<<< HEAD
             /* lebih kecil */
+=======
+>>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             font-weight: bold;
         }
 
@@ -115,7 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 6px;
             transition: all 0.2s ease;
             white-space: nowrap;
+<<<<<<< HEAD
             /* cegah wrap */
+=======
+>>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
         }
 
         .exit-btn:hover {
@@ -133,7 +153,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow: hidden;
             display: flex;
             margin-top: 80px;
+<<<<<<< HEAD
             /* Jarak dari navbar */
+=======
+>>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
         }
 
         .login-form-section {
@@ -193,7 +216,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 14px;
         }
 
+<<<<<<< HEAD
         input[type="text"],
+=======
+        input[type="email"],
+>>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
         input[type="password"] {
             width: 100%;
             padding: 12px 15px;
@@ -372,8 +399,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="POST" id="loginForm">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required autocomplete="off" />
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" 
+                           value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                           required autocomplete="off" />
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -393,7 +422,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         function resetForm() {
             document.getElementById('loginForm').reset();
-            document.getElementById('username').focus();
+            document.getElementById('email').focus();
         }
     </script>
 </body>
