@@ -47,6 +47,7 @@ $uploadPath = '../../../api/uploads/';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Laporan Aduan - SIMPELSI</title>
+    <link rel="shortcut icon" href="../../assets/logo_simpelsi.png" type="image/x-icon">
     <style>
         /* --- Gaya Umum --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
