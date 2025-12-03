@@ -24,6 +24,7 @@ require_once '../KoneksiDatabase/koneksi.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola TPS - SIMPELSI</title>
+    <link rel="shortcut icon" href="../../assets/logo_simpelsi.png" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -191,8 +192,9 @@ require_once '../KoneksiDatabase/koneksi.php';
             top: 0;
             left: 0;
             z-index: 1001;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .navbar-mobile-menu-btn {
             background: none;
             border: none;
@@ -201,6 +203,7 @@ require_once '../KoneksiDatabase/koneksi.php';
             cursor: pointer;
             padding: 5px;
         }
+
         .navbar-mobile-title {
             display: flex;
             align-items: center;
@@ -208,6 +211,7 @@ require_once '../KoneksiDatabase/koneksi.php';
             font-weight: bold;
             font-size: 16px;
         }
+
         .navbar-mobile-title .logo {
             width: 30px;
             height: 30px;
@@ -220,6 +224,7 @@ require_once '../KoneksiDatabase/koneksi.php';
             font-weight: bold;
             font-size: 14px;
         }
+
         .navbar-mobile-exit {
             background: white;
             color: #2e8b57;
@@ -230,6 +235,7 @@ require_once '../KoneksiDatabase/koneksi.php';
             cursor: pointer;
             text-decoration: none;
         }
+
         .navbar-mobile-exit:hover {
             background: #e6ffe6;
         }
@@ -244,15 +250,17 @@ require_once '../KoneksiDatabase/koneksi.php';
             background: #e6e6e6;
             z-index: 1000;
             padding: 10px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-height: calc(100vh - 60px);
             overflow-y: auto;
         }
+
         .mobile-sidebar .sidebar-menu {
             list-style: none;
             padding: 0;
             margin: 0;
         }
+
         .mobile-sidebar .menu-item {
             padding: 12px 15px;
             margin-bottom: 4px;
@@ -267,15 +275,18 @@ require_once '../KoneksiDatabase/koneksi.php';
             font-weight: 600;
             font-size: 14px;
         }
+
         .mobile-sidebar .menu-item:hover {
             background: #f0f0f0;
             transform: translateX(4px);
         }
+
         .mobile-sidebar .menu-item.active {
             background: #2e8b57;
             color: white;
             box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
         }
+
         .mobile-sidebar .menu-item.active .menu-icon {
             background: white;
             color: #2e8b57;
@@ -309,9 +320,10 @@ require_once '../KoneksiDatabase/koneksi.php';
             background: white;
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
+
         .search-input {
             width: 100%;
             padding: 8px 15px;
@@ -342,7 +354,8 @@ require_once '../KoneksiDatabase/koneksi.php';
             font-size: 14px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
@@ -448,10 +461,12 @@ require_once '../KoneksiDatabase/koneksi.php';
             display: none;
             pointer-events: none;
         }
+
         .popup-overlay.active {
             display: flex;
             pointer-events: auto;
         }
+
         .popup-content {
             background: white;
             padding: 25px;
@@ -459,30 +474,35 @@ require_once '../KoneksiDatabase/koneksi.php';
             width: 400px;
             max-width: 90%;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             transform: scale(0.8);
             opacity: 0;
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
+
         .popup-content.show {
             transform: scale(1);
             opacity: 1;
         }
+
         .popup-content h3 {
             margin: 0 0 15px 0;
             font-size: 20px;
             color: #333;
         }
+
         .popup-content p {
             margin: 0 0 20px 0;
             color: #555;
             font-size: 15px;
         }
+
         .popup-btns {
             display: flex;
             justify-content: center;
             gap: 10px;
         }
+
         .popup-btn {
             padding: 10px 20px;
             border: none;
@@ -492,42 +512,81 @@ require_once '../KoneksiDatabase/koneksi.php';
             font-size: 14px;
             transition: background 0.2s;
         }
+
         .popup-btn.cancel {
             background: #6c757d;
             color: white;
         }
+
         .popup-btn.cancel:hover {
             background: #5a6268;
         }
+
         .popup-btn.confirm {
             background: #dc3545;
             color: white;
         }
+
         .popup-btn.confirm:hover {
             background: #c82333;
         }
 
         /* ✅ POPUP SUKSES */
-        .popup-content.success { 
-            border-left: 5px solid #28a745; 
+        .popup-content.success {
+            border-left: 5px solid #28a745;
         }
 
         @media (max-width: 768px) {
-            .header-desktop, .sidebar-desktop { display: none; }
-            .main-content { margin-left: 0; padding-top: 70px; }
-            th, td { padding: 10px 8px; font-size: 13px; }
-            .btn-action { width: 28px; height: 28px; font-size: 12px; }
-            .footer-buttons { flex-direction: column; gap: 10px; }
+
+            .header-desktop,
+            .sidebar-desktop {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 70px;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+
+            .btn-action {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .footer-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
 
         @media (max-width: 480px) {
-            .table-container { padding: 15px; }
-            .table-title { font-size: 18px; }
-            .btn-footer { width: 100%; justify-content: center; }
+            .table-container {
+                padding: 15px;
+            }
+
+            .table-title {
+                font-size: 18px;
+            }
+
+            .btn-footer {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         @media (min-width: 769px) {
-            .navbar-mobile, .mobile-sidebar { display: none; }
+
+            .navbar-mobile,
+            .mobile-sidebar {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -551,11 +610,26 @@ require_once '../KoneksiDatabase/koneksi.php';
 
     <div class="sidebar-desktop">
         <ul class="sidebar-desktop-menu">
-            <li><a href="dashboardAdmin.php" class="menu-item"><div class="menu-icon">📊</div><div>Beranda</div></a></li>
-            <li><a href="kelolaLaporan.php" class="menu-item"><div class="menu-icon">📋</div><div>Kelola Laporan Aduan</div></a></li>
-            <li><a href="kelolaArtikel.php" class="menu-item"><div class="menu-icon">📝</div><div>Kelola Artikel Edukasi</div></a></li>
-            <li><a href="kelolaTPS.php" class="menu-item active"><div class="menu-icon">🗑️</div><div>Kelola Informasi TPS</div></a></li>
-            <li><a href="kelolaAkun.php" class="menu-item"><div class="menu-icon">🔐</div><div>Kelola Akun</div></a></li>
+            <li><a href="dashboardAdmin.php" class="menu-item">
+                    <div class="menu-icon">📊</div>
+                    <div>Beranda</div>
+                </a></li>
+            <li><a href="kelolaLaporan.php" class="menu-item">
+                    <div class="menu-icon">📋</div>
+                    <div>Kelola Laporan Aduan</div>
+                </a></li>
+            <li><a href="kelolaArtikel.php" class="menu-item">
+                    <div class="menu-icon">📝</div>
+                    <div>Kelola Artikel Edukasi</div>
+                </a></li>
+            <li><a href="kelolaTPS.php" class="menu-item active">
+                    <div class="menu-icon">🗑️</div>
+                    <div>Kelola Informasi TPS</div>
+                </a></li>
+            <li><a href="kelolaAkun.php" class="menu-item">
+                    <div class="menu-icon">🔐</div>
+                    <div>Kelola Akun</div>
+                </a></li>
         </ul>
     </div>
 
@@ -572,11 +646,26 @@ require_once '../KoneksiDatabase/koneksi.php';
 
     <div class="mobile-sidebar" id="mobileSidebar">
         <ul class="sidebar-menu">
-            <li><a href="dashboardAdmin.php" class="menu-item"><div class="menu-icon">📊</div><div>Beranda</div></a></li>
-            <li><a href="kelolaLaporan.php" class="menu-item"><div class="menu-icon">📋</div><div>Kelola Laporan Aduan</div></a></li>
-            <li><a href="kelolaArtikel.php" class="menu-item"><div class="menu-icon">📝</div><div>Kelola Artikel Edukasi</div></a></li>
-            <li><a href="kelolaTPS.php" class="menu-item active"><div class="menu-icon">🗑️</div><div>Kelola Informasi TPS</div></a></li>
-            <li><a href="kelolaAkun.php" class="menu-item"><div class="menu-icon">🔐</div><div>Kelola Akun</div></a></li>
+            <li><a href="dashboardAdmin.php" class="menu-item">
+                    <div class="menu-icon">📊</div>
+                    <div>Beranda</div>
+                </a></li>
+            <li><a href="kelolaLaporan.php" class="menu-item">
+                    <div class="menu-icon">📋</div>
+                    <div>Kelola Laporan Aduan</div>
+                </a></li>
+            <li><a href="kelolaArtikel.php" class="menu-item">
+                    <div class="menu-icon">📝</div>
+                    <div>Kelola Artikel Edukasi</div>
+                </a></li>
+            <li><a href="kelolaTPS.php" class="menu-item active">
+                    <div class="menu-icon">🗑️</div>
+                    <div>Kelola Informasi TPS</div>
+                </a></li>
+            <li><a href="kelolaAkun.php" class="menu-item">
+                    <div class="menu-icon">🔐</div>
+                    <div>Kelola Akun</div>
+                </a></li>
         </ul>
     </div>
 
@@ -634,7 +723,7 @@ require_once '../KoneksiDatabase/koneksi.php';
                             <tr>
                                 <td colspan="6" style="text-align: center; padding: 20px; color: #666;">Belum ada data TPS.</td>
                             </tr>
-                        <?php endif;
+                    <?php endif;
                     } catch (Exception $e) {
                         echo '<tr><td colspan="6" style="color: red; text-align: center;">Error: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
                     }
@@ -692,6 +781,7 @@ require_once '../KoneksiDatabase/koneksi.php';
 
         // Konfirmasi hapus (tidak diubah)
         let idYangAkanDihapus = null;
+
         function konfirmasiHapus(id) {
             idYangAkanDihapus = id;
             const popup = document.getElementById('confirmPopup');
@@ -744,10 +834,10 @@ require_once '../KoneksiDatabase/koneksi.php';
 
             // Fade-out navigasi
             document.querySelectorAll('a[href]').forEach(link => {
-                if (!link.href.includes('logout.php') && 
-                    (link.classList.contains('btn-create') || 
-                     link.closest('.menu-item') || 
-                     link.classList.contains('header-desktop-exit'))) {
+                if (!link.href.includes('logout.php') &&
+                    (link.classList.contains('btn-create') ||
+                        link.closest('.menu-item') ||
+                        link.classList.contains('header-desktop-exit'))) {
                     link.addEventListener('click', e => {
                         e.preventDefault();
                         mainContent.style.opacity = '0';

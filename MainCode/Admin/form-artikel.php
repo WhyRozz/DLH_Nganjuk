@@ -106,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $id ? 'Edit' : 'Tambah' ?> Artikel - SIMPELSI</title>
+    <link rel="shortcut icon" href="../../assets/logo_simpelsi.png" type="image/x-icon">
     <style>
         /* --- Gaya Umum --- */
         * {

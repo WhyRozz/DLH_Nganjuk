@@ -1,11 +1,17 @@
 <?php
 session_start();
 
-// Proteksi: hanya admin yang sudah login
-// if (!isset($_SESSION['admin_id'])) {
-//     header("Location: ../login/login.php");
-//     exit;
-// }
+// Anti-cache headers
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Proteksi login
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../Admin/login.php");
+    exit;
+}
 
 // Load koneksi database
 require_once '../KoneksiDatabase/koneksi.php';
@@ -118,6 +124,7 @@ if (empty($tahun_options)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIMPELSI</title>
+    <link rel="shortcut icon" href="../../assets/logo.jpg" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -128,7 +135,6 @@ if (empty($tahun_options)) {
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
-            display: flex;
             min-height: 100vh;
         }
 
@@ -142,8 +148,8 @@ if (empty($tahun_options)) {
             opacity: 1;
         }
 
-        /* Header */
-        .header {
+        /* Header Desktop */
+        .header-desktop {
             width: 100%;
             background: #2e8b57;
             color: white;
@@ -157,13 +163,13 @@ if (empty($tahun_options)) {
             z-index: 1000;
         }
 
-        .header-title {
+        .header-desktop-title {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .header-logo {
+        .header-desktop-logo {
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -175,7 +181,7 @@ if (empty($tahun_options)) {
             color: #2e8b57;
         }
 
-        .header-exit {
+        .header-desktop-exit {
             background: white;
             color: #2e8b57;
             padding: 6px 12px;
@@ -189,13 +195,13 @@ if (empty($tahun_options)) {
             text-decoration: none;
         }
 
-        .header-exit:hover {
+        .header-desktop-exit:hover {
             background: #e6ffe6;
             transform: scale(1.05);
         }
 
-        /* Sidebar */
-        .sidebar {
+        /* Sidebar Desktop */
+        .sidebar-desktop {
             width: 250px;
             background: #e6e6e6;
             position: fixed;
@@ -210,7 +216,7 @@ if (empty($tahun_options)) {
             flex-direction: column;
         }
 
-        .sidebar-menu {
+        .sidebar-desktop-menu {
             list-style: none;
             padding: 0 20px;
             margin: 0;
@@ -259,16 +265,152 @@ if (empty($tahun_options)) {
             flex-shrink: 0;
         }
 
+        /* Gaya khusus untuk logo gambar */
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Agar gambar tidak terdistorsi */
+            border-radius: 50%;
+            /* Tetap bulat */
+            display: block;
+        }
+
         .menu-item.active .menu-icon {
             background: white;
             color: #2e8b57;
         }
 
-        /* Main Content dengan animasi fade */
+        /* Navbar Mobile */
+        .navbar-mobile {
+            width: 100%;
+            background: #2e8b57;
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1001;
+            /* Lebih tinggi dari konten */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-mobile-menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .navbar-mobile-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .navbar-mobile-title .logo {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2e8b57;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .navbar-mobile-exit {
+            background: white;
+            color: #2e8b57;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .navbar-mobile-exit:hover {
+            background: #e6ffe6;
+        }
+
+        /* Dropdown Mobile - Default: Sembunyikan */
+        .mobile-sidebar {
+            display: none;
+            /* <-- Baris ini diubah dari display: block menjadi display: none */
+            position: fixed;
+            top: 60px;
+            /* Sesuaikan dengan tinggi navbar */
+            left: 0;
+            width: 100%;
+            background: #e6e6e6;
+            /* <-- Warna latar sidebar mobile */
+            z-index: 1000;
+            padding: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .mobile-sidebar .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mobile-sidebar .menu-item {
+            padding: 12px 15px;
+            margin-bottom: 4px;
+            background: white;
+            /* Warna latar item */
+            border-radius: 0;
+            border-radius: 8px;
+            margin: 0 10px 4px 10px;
+            /* Gaya untuk item mobile */
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .mobile-sidebar .menu-item:hover {
+            background: #f0f0f0;
+            transform: translateX(4px);
+        }
+
+        /* Warna item aktif di sidebar mobile */
+        .mobile-sidebar .menu-item.active {
+            background: #2e8b57;
+            /* Warna latar item aktif */
+            color: white;
+            box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
+        }
+
+        .mobile-sidebar .menu-item.active .menu-icon {
+            background: white;
+            /* Warna ikon di item aktif */
+            color: #2e8b57;
+        }
+
+        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 250px;
+            /* Margin untuk sidebar desktop */
             padding: 80px 30px 40px;
+            /* Padding untuk header desktop */
             background: #f9f9f9;
             min-height: 100vh;
             opacity: 1;
@@ -279,7 +421,6 @@ if (empty($tahun_options)) {
             opacity: 0;
         }
 
-        /* Sisa CSS tetap sama... */
         .content-header {
             margin-bottom: 20px;
         }
@@ -501,71 +642,205 @@ if (empty($tahun_options)) {
             color: #721c24;
         }
 
-        /* Responsive */
+        /* RESPONSIF: Mobile */
+        /* 1. Sembunyikan elemen Desktop di layar kecil */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-                padding: 80px 15px 20px;
+
+            .header-desktop,
+            .sidebar-desktop {
+                display: none;
             }
 
             .main-content {
-                margin-left: 200px;
+                margin-left: 0;
+                padding-top: 70px;
+                /* Sesuaikan dengan tinggi navbar mobile */
+            }
+
+            /* Penyesuaian layout konten untuk mobile */
+            .stats-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-controls select,
+            .filter-controls button,
+            .filter-controls a {
+                width: 100%;
+                box-sizing: border-box;
             }
 
             .stats-cards {
                 grid-template-columns: 1fr;
             }
 
-            .filter-controls {
-                flex-direction: column;
-                align-items: flex-start;
+            .mini-bar-chart {
+                height: 100px;
+            }
+
+            .bar {
+                width: 18px;
+            }
+
+            .bar-label {
+                font-size: 10px;
             }
         }
 
-        @media (max-width: 480px) {
-            .sidebar {
-                width: 100%;
-                position: static;
-                height: auto;
-                box-shadow: none;
-                border-bottom: 2px solid #2e8b57;
+        /* 2. Sembunyikan elemen Mobile di layar lebar */
+        @media (min-width: 769px) {
+
+            .navbar-mobile,
+            .mobile-sidebar {
+                display: none;
+            }
+        }
+
+        /* Popup Konfirmasi Logout */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.3s ease;
+        }
+
+        .popup-content h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #2e8b57;
+        }
+
+        .popup-content p {
+            margin: 0 0 15px 0;
+            color: #555;
+        }
+
+        .popup-btn {
+            margin: 0 5px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .popup-btn.yes {
+            background: #2e8b57;
+            color: white;
+        }
+
+        .popup-btn.no {
+            background: #dc3545;
+            /* Merah */
+            color: white;
+        }
+
+        .popup-btn:hover {
+            opacity: 0.9;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
             }
 
-            .main-content {
-                margin-left: 0;
-                padding-top: 100px;
-            }
-
-            .header {
-                position: static;
-            }
-
-            .stats-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
+            to {
+                transform: scale(1);
+                opacity: 1;
             }
         }
     </style>
 </head>
 
 <body class="fade-in">
-    <!-- Header -->
-    <div class="header">
-        <div class="header-title">
-            <div class="header-logo">S</div>
+    <!-- Header Desktop (Tampil di Laptop/PC) -->
+    <div class="header-desktop">
+        <div class="header-desktop-title">
+            <div class="header-desktop-logo">
+                <img src="../../assets/logo.jpg" alt="Logo SIMPELSI" class="logo-img">
+            </div>
             <div>
                 <div style="font-size: 18px; font-weight: bold;">Beranda</div>
                 <div style="font-size: 12px; opacity: 0.9;">ADMIN</div>
             </div>
         </div>
-        <a href="../dashboard.php" class="header-exit">
+        <button class="header-desktop-exit" id="logoutBtn">
             <span>←</span> KELUAR
-        </a>
+        </button>
     </div>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
+    <!-- Sidebar Desktop (Tampil di Laptop/PC) -->
+    <div class="sidebar-desktop">
+        <ul class="sidebar-desktop-menu">
+            <li>
+                <a href="dashboardAdmin.php" class="menu-item active">
+                    <div class="menu-icon">📊</div>
+                    <div>Beranda</div>
+                </a>
+            </li>
+            <li>
+                <a href="kelolaLaporan.php" class="menu-item">
+                    <div class="menu-icon">📋</div>
+                    <div>Kelola Laporan Aduan</div>
+                </a>
+            </li>
+            <li>
+                <a href="kelolaArtikel.php" class="menu-item">
+                    <div class="menu-icon">📝</div>
+                    <div>Kelola Artikel Edukasi</div>
+                </a>
+            </li>
+            <li>
+                <a href="kelolaTPS.php" class="menu-item">
+                    <div class="menu-icon">🗑️</div>
+                    <div>Kelola Informasi TPS</div>
+                </a>
+            </li>
+            <li>
+                <a href="kelolaAkun.php" class="menu-item">
+                    <div class="menu-icon">🔐</div>
+                    <div>Kelola Akun</div>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Navbar Mobile (Tampil di HP) -->
+    <div class="navbar-mobile">
+        <button class="navbar-mobile-menu-btn" id="menuToggle">☰</button>
+        <div class="navbar-mobile-title">
+            <div class="logo">
+                <img src="../../assets/logo.jpg" alt="Logo SIMPELSI" class="logo-img">
+            </div>
+            <div>BERANDA</div>
+        </div>
+        <button class="navbar-mobile-exit" id="logoutBtnMobile">←</button>
+    </div>
+
+    <!-- Dropdown Mobile Sidebar (Tampil di HP saat tombol diklik) -->
+    <div class="mobile-sidebar" id="mobileSidebar">
         <ul class="sidebar-menu">
             <li>
                 <a href="dashboardAdmin.php" class="menu-item active">
@@ -591,7 +866,22 @@ if (empty($tahun_options)) {
                     <div>Kelola Informasi TPS</div>
                 </a>
             </li>
+            <li>
+                <a href="kelolaAkun.php" class="menu-item">
+                    <div class="menu-icon">🔐</div>
+                    <div>Kelola Akun</div>
+                </a>
+            </li>
         </ul>
+    </div>
+
+    <!-- Popup Konfirmasi Logout -->
+    <div id="popupLogout" class="popup-overlay">
+        <div class="popup-content">
+            <h3>Apakah Yakin Ingin Keluar?</h3>
+            <button class="popup-btn yes" onclick="logout()">Iya</button>
+            <button class="popup-btn no" onclick="closePopup()">Tidak</button>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -701,18 +991,57 @@ if (empty($tahun_options)) {
         </div>
     </div>
 
-    <!-- Animasi Navigasi -->
+    <!-- Script untuk toggle sidebar mobile -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const body = document.body;
             const mainContent = document.getElementById('mainContent');
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileSidebar = document.getElementById('mobileSidebar');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+            const popup = document.getElementById('popupLogout');
+
+            // Toggle sidebar mobile
+            menuToggle.addEventListener('click', function() {
+                mobileSidebar.style.display = mobileSidebar.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Tutup sidebar jika klik di luar sidebar
+            document.addEventListener('click', function(event) {
+                const isClickInsideNav = menuToggle.contains(event.target);
+                const isClickInsideSidebar = mobileSidebar.contains(event.target);
+
+                if (!isClickInsideNav && !isClickInsideSidebar) {
+                    mobileSidebar.style.display = 'none';
+                }
+            });
+
+            // Tampilkan popup logout
+            logoutBtn.addEventListener('click', function() {
+                popup.style.display = 'flex';
+            });
+
+            logoutBtnMobile.addEventListener('click', function() {
+                popup.style.display = 'flex';
+            });
+
+            // Tutup popup jika klik di luar popup
+            document.addEventListener('click', function(event) {
+                const isClickInsidePopup = popup.contains(event.target);
+                const isClickLogoutBtn = logoutBtn.contains(event.target) || logoutBtnMobile.contains(event.target);
+
+                if (!isClickInsidePopup && !isClickLogoutBtn) {
+                    popup.style.display = 'none';
+                }
+            });
 
             // Fade-in saat halaman dimuat
             setTimeout(() => {
                 body.classList.add('fade-in-ready');
             }, 50);
 
-            // Fade-out saat navigasi
+            // Fade-out saat navigasi (termasuk link dalam sidebar mobile)
             document.querySelectorAll('.menu-item a, .filter-controls a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -730,35 +1059,14 @@ if (empty($tahun_options)) {
                 });
             });
         });
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const mainContent = document.getElementById('mainContent');
 
-            // Terapkan fade out saat klik link internal (kecuali logout)
-            document.querySelectorAll('.menu-item, .filter-controls a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    if (this.tagName === 'A') {
-                        e.preventDefault();
-                        const url = this.href;
-                        mainContent.classList.add('fade-out');
-                        setTimeout(() => {
-                            window.location.href = url;
-                        }, 200);
-                    }
-                });
-            });
+        function logout() {
+            window.location.href = '../../MainCode/Admin/logout.php';
+        }
 
-            // Untuk tombol submit form (filter)
-            document.querySelectorAll('.filter-controls form').forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    mainContent.classList.add('fade-out');
-                    // Biarkan form submit normal setelah animasi
-                    setTimeout(() => {
-                        // Form akan submit sendiri karena tidak dicegah
-                    }, 200);
-                });
-            });
-        });
+        function closePopup() {
+            document.getElementById('popupLogout').style.display = 'none';
+        }
     </script>
 </body>
 

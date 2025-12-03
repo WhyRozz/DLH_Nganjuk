@@ -100,114 +100,360 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $mode === 'edit' ? 'Edit' : 'Tambah' ?> TPS - SIMPELSI</title>
+    <link rel="shortcut icon" href="../../assets/logo_simpelsi.png" type="image/x-icon">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
         }
-        body.fade-in .main-content { opacity: 0; transition: opacity 0.3s ease-out; }
-        body.fade-in-ready .main-content { opacity: 1; }
+
+        body.fade-in .main-content {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
+
+        body.fade-in-ready .main-content {
+            opacity: 1;
+        }
 
         /* Header Desktop */
         .header-desktop {
-            width: 100%; background: #2e8b57; color: white;
-            padding: 12px 30px; display: flex; justify-content: space-between;
-            align-items: center; position: fixed; top: 0; left: 0; z-index: 1000;
+            width: 100%;
+            background: #2e8b57;
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
-        .header-desktop-title { display: flex; align-items: center; gap: 10px; }
+
+        .header-desktop-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .header-desktop-logo {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: white; display: flex; align-items: center;
-            justify-content: center; font-weight: bold; color: #2e8b57;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #2e8b57;
         }
+
         .header-desktop-exit {
-            background: white; color: #2e8b57; padding: 6px 12px;
-            border-radius: 5px; font-size: 12px; font-weight: bold;
-            text-decoration: none; display: flex; align-items: center; gap: 5px;
+            background: white;
+            color: #2e8b57;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-        .header-desktop-exit:hover { background: #e6ffe6; transform: scale(1.05); }
+
+        .header-desktop-exit:hover {
+            background: #e6ffe6;
+            transform: scale(1.05);
+        }
 
         /* Sidebar Desktop */
         .sidebar-desktop {
-            width: 250px; background: #e6e6e6;
-            position: fixed; top: 60px; left: 0; bottom: 0;
-            padding: 20px 0; overflow-y: auto;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.1); z-index: 999;
+            width: 250px;
+            background: #e6e6e6;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            padding: 20px 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+            z-index: 999;
         }
-        .sidebar-desktop-menu { list-style: none; padding: 0 20px; margin: 0; }
+
+        .sidebar-desktop-menu {
+            list-style: none;
+            padding: 0 20px;
+            margin: 0;
+        }
+
         .menu-item {
-            padding: 14px 20px; margin-bottom: 8px; background: white;
-            border-radius: 10px; transition: all 0.25s ease;
-            display: flex; align-items: center; gap: 12px;
-            text-decoration: none; color: #333; font-weight: 600; font-size: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 14px 20px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .menu-item:hover { background: #f0f0f0; transform: translateX(4px); }
-        .menu-item.active { background: #2e8b57; color: white; box-shadow: 0 2px 6px rgba(46,139,87,0.3); }
+
+        .menu-item:hover {
+            background: #f0f0f0;
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            background: #2e8b57;
+            color: white;
+            box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
+        }
+
         .menu-icon {
-            width: 32px; height: 32px; background: #2e8b57; color: white;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px;
+            width: 32px;
+            height: 32px;
+            background: #2e8b57;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
         }
-        .logo-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
-        .menu-item.active .menu-icon { background: white; color: #2e8b57; }
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .menu-item.active .menu-icon {
+            background: white;
+            color: #2e8b57;
+        }
 
         /* Mobile */
         @media (max-width: 768px) {
-            .header-desktop, .sidebar-desktop { display: none; }
-            .main-content { margin-left: 0; padding-top: 70px; }
-            .form-row { flex-direction: column; }
-            .form-group { min-width: 100%; }
-        }
-        @media (min-width: 769px) {
-            .navbar-mobile, .mobile-sidebar { display: none; }
+
+            .header-desktop,
+            .sidebar-desktop {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 70px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                min-width: 100%;
+            }
         }
 
-        .main-content { flex: 1; margin-left: 250px; padding: 80px 30px 40px; background: #f9f9f9; min-height: 100vh; }
-        .content-header h2 { color: #2e8b57; font-size: 24px; margin-bottom: 20px; }
-        .form-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 1000px; margin: 0 auto; }
-        .form-title { color: #2e8b57; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #2e8b57; padding-bottom: 8px; }
-        .form-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 250px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: #555; font-weight: 500; }
-        .form-input, .form-textarea { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-        .form-textarea { min-height: 120px; resize: vertical; }
-        .alert { padding: 10px 15px; margin-bottom: 20px; border-radius: 6px; font-size: 14px; }
-        .alert-error { background: #f8d7da; color: #721c24; }
-        .action-buttons { display: flex; gap: 12px; margin-top: 25px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .btn-primary { background: #2e8b57; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn:hover { opacity: 0.9; }
+        @media (min-width: 769px) {
+
+            .navbar-mobile,
+            .mobile-sidebar {
+                display: none;
+            }
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 80px 30px 40px;
+            background: #f9f9f9;
+            min-height: 100vh;
+        }
+
+        .content-header h2 {
+            color: #2e8b57;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            color: #2e8b57;
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2e8b57;
+            padding-bottom: 8px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .alert {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #2e8b57;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
 
         /* Popup */
         .popup-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: flex; justify-content: center;
-            align-items: center; z-index: 9999; display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
         }
-        .popup-overlay.active { display: flex; }
+
+        .popup-overlay.active {
+            display: flex;
+        }
+
         .popup-content {
-            background: white; padding: 25px; border-radius: 10px; width: 400px; max-width: 90%;
-            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transform: scale(0.8); opacity: 0; transition: transform 0.3s, opacity 0.3s;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
         }
-        .popup-content.show { transform: scale(1); opacity: 1; }
-        .popup-content.error { border-left: 5px solid #dc3545; }
-        .popup-content h3 { margin: 0 0 15px; font-size: 20px; }
-        .popup-content p { margin: 0 0 20px; color: #555; }
+
+        .popup-content.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .popup-content.error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .popup-content h3 {
+            margin: 0 0 15px;
+            font-size: 20px;
+        }
+
+        .popup-content p {
+            margin: 0 0 20px;
+            color: #555;
+        }
+
         .popup-btn {
-            padding: 10px 20px; background: #2e8b57; color: white;
-            border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
+            padding: 10px 20px;
+            background: #2e8b57;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
         }
-        .popup-btn:hover { background: #226b42; }
+
+        .popup-btn:hover {
+            background: #226b42;
+        }
     </style>
 </head>
+
 <body class="fade-in">
     <!-- Header & Sidebar (sama seperti sebelumnya) -->
     <div class="header-desktop">
@@ -225,11 +471,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="sidebar-desktop">
         <ul class="sidebar-desktop-menu">
-            <li><a href="dashboardAdmin.php" class="menu-item"><div class="menu-icon">📊</div>Beranda</a></li>
-            <li><a href="kelolaLaporan.php" class="menu-item"><div class="menu-icon">📋</div>Kelola Laporan Aduan</a></li>
-            <li><a href="kelolaArtikel.php" class="menu-item"><div class="menu-icon">📝</div>Kelola Artikel Edukasi</a></li>
-            <li><a href="kelolaTPS.php" class="menu-item active"><div class="menu-icon">🗑️</div>Kelola Informasi TPS</a></li>
-            <li><a href="kelolaAkun.php" class="menu-item"><div class="menu-icon">🔐</div>Kelola Akun</a></li>
+            <li><a href="dashboardAdmin.php" class="menu-item">
+                    <div class="menu-icon">📊</div>Beranda
+                </a></li>
+            <li><a href="kelolaLaporan.php" class="menu-item">
+                    <div class="menu-icon">📋</div>Kelola Laporan Aduan
+                </a></li>
+            <li><a href="kelolaArtikel.php" class="menu-item">
+                    <div class="menu-icon">📝</div>Kelola Artikel Edukasi
+                </a></li>
+            <li><a href="kelolaTPS.php" class="menu-item active">
+                    <div class="menu-icon">🗑️</div>Kelola Informasi TPS
+                </a></li>
+            <li><a href="kelolaAkun.php" class="menu-item">
+                    <div class="menu-icon">🔐</div>Kelola Akun
+                </a></li>
         </ul>
     </div>
 
@@ -246,11 +502,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="mobile-sidebar" id="mobileSidebar">
         <ul class="sidebar-menu">
-            <li><a href="dashboardAdmin.php" class="menu-item"><div class="menu-icon">📊</div>Beranda</a></li>
-            <li><a href="kelolaLaporan.php" class="menu-item"><div class="menu-icon">📋</div>Kelola Laporan Aduan</a></li>
-            <li><a href="kelolaArtikel.php" class="menu-item"><div class="menu-icon">📝</div>Kelola Artikel Edukasi</a></li>
-            <li><a href="kelolaTPS.php" class="menu-item active"><div class="menu-icon">🗑️</div>Kelola Informasi TPS</a></li>
-            <li><a href="kelolaAkun.php" class="menu-item"><div class="menu-icon">🔐</div>Kelola Akun</a></li>
+            <li><a href="dashboardAdmin.php" class="menu-item">
+                    <div class="menu-icon">📊</div>Beranda
+                </a></li>
+            <li><a href="kelolaLaporan.php" class="menu-item">
+                    <div class="menu-icon">📋</div>Kelola Laporan Aduan
+                </a></li>
+            <li><a href="kelolaArtikel.php" class="menu-item">
+                    <div class="menu-icon">📝</div>Kelola Artikel Edukasi
+                </a></li>
+            <li><a href="kelolaTPS.php" class="menu-item active">
+                    <div class="menu-icon">🗑️</div>Kelola Informasi TPS
+                </a></li>
+            <li><a href="kelolaAkun.php" class="menu-item">
+                    <div class="menu-icon">🔐</div>Kelola Akun
+                </a></li>
         </ul>
     </div>
 
@@ -383,7 +649,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Fade dan mobile menu (sama seperti sebelumnya)
             const body = document.body;
             setTimeout(() => body.classList.add('fade-in-ready'), 50);
-            
+
             const menuToggle = document.getElementById('menuToggle');
             const mobileSidebar = document.getElementById('mobileSidebar');
             menuToggle?.addEventListener('click', () => {
@@ -408,4 +674,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 </body>
+
 </html>
