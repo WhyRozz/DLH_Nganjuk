@@ -1,44 +1,70 @@
 <?php
 session_start();
 
-// Jika sudah login, langsung ke dashboard
-// if (isset($_SESSION['admin_id'])) {
-//     header("Location: ../Admin/dashboardAdmin.php");
-//     exit;
-// }
-
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $password = $_POST['password'] ?? ''; // Tidak di-trim di sini karena nanti di-trim saat validasi
 
     if (empty($email) || empty($password)) {
-        $error = 'Email dan password wajib diisi.';
+        $error = 'Email dan sandi wajib diisi.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Format email tidak valid.';
+        $error = 'Format email tidak valid. Pastikan email Anda mengandung "@" dan domain yang benar.';
     } else {
-        require_once '../KoneksiDatabase/koneksi.php';
-
-        try {
-            // ✅ Cari berdasarkan EMAIL (bukan username)
-            $stmt = $pdo->prepare("SELECT id_admin, email, password FROM admin WHERE email = ?");
-            $stmt->execute([$email]);
-            $admin = $stmt->fetch();
-
-            // ✅ Verifikasi: password HARUS plain text (sesuai kebutuhan Anda sebelumnya)
-            // Jika nanti pakai hash, ganti jadi: password_verify($password, $admin['password'])
-            if ($admin && $password === $admin['password']) {
-                $_SESSION['admin_id'] = $admin['id_admin'];
-                $_SESSION['admin_email'] = $admin['email']; // simpan email, bukan username
-
-                header("Location: ../Admin/dashboardAdmin.php");
-                exit;
+        // ✅ Validasi panjang sandi (SSAN Poin 10 & 12)
+        $passwordLength = strlen($password);
+        if ($passwordLength < 8) {
+            $error = 'Sandi minimal 8 karakter.';
+        } elseif ($passwordLength > 50) {
+            $error = 'Sandi maksimal 50 karakter.';
+        } else {
+            // ✅ Validasi karakter spesial (SSAN Poin 11) — HANYA BOLEH HURUF, ANGKA, DAN SPASI
+            if (!preg_match('/^[a-zA-Z0-9\s]+$/', $password)) {
+                $error = 'Sandi tidak boleh mengandung karakter spesial. Hanya boleh huruf, angka, dan spasi.';
             } else {
-                $error = 'Email atau password salah.';
+                require_once '../KoneksiDatabase/koneksi.php';
+
+                try {
+                    $stmt = $pdo->prepare("SELECT id_admin, email, password FROM admin WHERE email = ?");
+                    $stmt->execute([$email]);
+                    $admin = $stmt->fetch();
+
+                    if ($admin) {
+                        $storedPass = $admin['password'];
+
+                        // 🔐 DETEKSI: apakah sandi masih plain text atau sudah hash?
+                        if (password_get_info($storedPass)['algo'] === null) {
+                            // ❗ Masih plain text → bandingkan langsung (backward compatible)
+                            if ($password === $storedPass) {
+                                // ✅ Login sukses → UPGRADE ke hash (sekali pakai)
+                                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                                if ($newHash) {
+                                    $upd = $pdo->prepare("UPDATE admin SET password = ? WHERE id_admin = ?");
+                                    $upd->execute([$newHash, $admin['id_admin']]);
+                                }
+                                $_SESSION['admin_id'] = $admin['id_admin'];
+                                $_SESSION['admin_email'] = $admin['email'];
+                                header("Location: ../Admin/dashboardAdmin.php");
+                                exit;
+                            }
+                        } else {
+                            // ✅ Sudah hash → verifikasi dengan password_verify()
+                            if (password_verify($password, $storedPass)) {
+                                $_SESSION['admin_id'] = $admin['id_admin'];
+                                $_SESSION['admin_email'] = $admin['email'];
+                                header("Location: ../Admin/dashboardAdmin.php");
+                                exit;
+                            }
+                        }
+                    }
+
+                    // Jika sampai sini, berarti gagal (email salah / sandi salah)
+                    $error = 'Email atau sandi salah. Silakan coba lagi.';
+                } catch (PDOException $e) {
+                    $error = 'Terjadi kesalahan saat mengakses database.';
+                }
             }
-        } catch (PDOException $e) {
-            $error = 'Kesalahan database: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         }
     }
 }
@@ -68,7 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 20px;
         }
 
-        /* Header */
         .header {
             position: fixed;
             top: 0;
@@ -76,29 +101,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
             background: #2e8b57;
             padding: 12px 20px;
-<<<<<<< HEAD
-            /* kurangi padding horizontal */
-=======
->>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             display: flex;
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 10;
             color: white;
-<<<<<<< HEAD
-            /* Tinggi responsif */
-=======
->>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             min-height: 60px;
         }
 
         .header-logo {
             width: 36px;
-<<<<<<< HEAD
-            /* sedikit lebih kecil */
-=======
->>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             height: 36px;
             margin-right: 8px;
             border-radius: 50%;
@@ -107,10 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .header-title {
             font-size: 1.3em;
-<<<<<<< HEAD
-            /* lebih kecil */
-=======
->>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
             font-weight: bold;
         }
 
@@ -132,10 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 6px;
             transition: all 0.2s ease;
             white-space: nowrap;
-<<<<<<< HEAD
-            /* cegah wrap */
-=======
->>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
         }
 
         .exit-btn:hover {
@@ -143,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: scale(1.03);
         }
 
-        /* CARD LOGIN */
         .login-card {
             width: 100%;
             max-width: 600px;
@@ -153,10 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow: hidden;
             display: flex;
             margin-top: 80px;
-<<<<<<< HEAD
-            /* Jarak dari navbar */
-=======
->>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
         }
 
         .login-form-section {
@@ -206,6 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .form-group {
             text-align: left;
             margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         label {
@@ -214,26 +217,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 600;
             color: #2e8b57;
             font-size: 14px;
+            line-height: 1.2;
         }
 
-<<<<<<< HEAD
-        input[type="text"],
-=======
+        /* Input Field Styling - Biarkan default */
         input[type="email"],
->>>>>>> bcccc589a942aaeddc09c5abda63bbc74f6453da
-        input[type="password"] {
+        input[type="password"],
+        input[type="text"] {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 16px;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
         input:focus {
             outline: none;
             border-color: #2e8b57;
             box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
+        }
+
+        /* Eye Icon Styling */
+        .eye-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            z-index: 10;
+        }
+
+        .eye-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .eye-icon:hover img {
+            filter: brightness(0.8);
         }
 
         .btn-login {
@@ -285,6 +310,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             animation: fadeInUp 0.5s ease;
         }
 
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.3s ease;
+        }
+
+        .popup-content.error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .popup-content.success {
+            border-left: 5px solid #28a745;
+        }
+
+        .popup-content h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        .popup-content p {
+            margin: 0;
+            color: #555;
+        }
+
+        .popup-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #2e8b57;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .popup-btn:hover {
+            background: #226b42;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -297,7 +390,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        /* RESPONSIF: MOBILE */
         @media (max-width: 768px) {
             .header {
                 padding: 10px 16px;
@@ -324,10 +416,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 gap: 4px;
             }
 
-            .header>div:first-child {
-                margin-right: 10px;
-            }
-
             .login-card {
                 margin-top: 100px;
                 flex-direction: column;
@@ -340,15 +428,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .login-image-section {
                 padding: 15px;
                 order: -1;
-                display: flex;
-                align-items: center;
-                justify-content: center;
             }
 
             .login-image-section img {
                 max-height: 220px;
-                max-width: 100%;
-                border-radius: 16px;
             }
         }
 
@@ -373,49 +456,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-    <!-- Header -->
     <div class="header">
         <div style="display: flex; align-items: center;">
             <img src="../../assets/logo.jpg" alt="Logo Simpelsi" class="header-logo">
             <div class="header-title">
-                Dashboard<br><span>ADMIN</span>
+                Selamat Datang Di<br><span>SimpelSi</span>
             </div>
         </div>
-        <a href="../dashboard.php" class="exit-btn">← EXIT</a>
+        <a href="../dashboard.php" class="exit-btn">← KELUAR</a>
     </div>
 
-    <!-- 1 CARD LOGIN -->
     <div class="login-card">
-        <!-- Bagian Form -->
         <div class="login-form-section">
             <div class="login-header">
                 <div class="login-title">LOGIN ADMIN</div>
                 <div class="login-subtitle">Simpelsi</div>
             </div>
 
-            <?php if (!empty($error)): ?>
-                <div class="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-
-            <form method="POST" id="loginForm">
+            <form method="POST" id="loginForm" novalidate>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" 
-                           value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
-                           required autocomplete="off" />
+                    <input type="email" id="email" name="email"
+                        value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                        autocomplete="off" />
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required />
+                    <label for="password">Sandi</label>
+                    <div style="position: relative; width: 100%;">
+                        <input type="password" id="password" name="password" />
+                        <!-- ✅ Eye Icon -->
+                        <span class="eye-icon" onclick="togglePasswordVisibility('password', this)">
+                            <img src="../../assets/hide.png" alt="Hide Password" id="eyeIconImg">
+                        </span>
+                    </div>
                 </div>
                 <button type="submit" class="btn-login">Login</button>
-                <button type="button" class="btn-reset" onclick="resetForm()">Reset Form</button>
+                <button type="button" class="btn-reset" onclick="resetForm()">Kosongkan Kolom</button>
             </form>
         </div>
 
-        <!-- Bagian Gambar -->
         <div class="login-image-section">
-            <img src="../../assets/Login.jpg" alt="Ilustrasi Login">
+            <img src="../../assets/Login.jpg" alt="Login SIMPELSI">
+        </div>
+    </div>
+
+    <div id="popup" class="popup-overlay">
+        <div class="popup-content">
+            <h3 id="popup-title">Judul Popup</h3>
+            <p id="popup-message">Pesan popup</p>
+            <button class="popup-btn" onclick="closePopup()">Tutup</button>
         </div>
     </div>
 
@@ -424,6 +513,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById('loginForm').reset();
             document.getElementById('email').focus();
         }
+
+        function showPopup(title, message, type = 'error') {
+            const popup = document.getElementById('popup');
+            const titleEl = document.getElementById('popup-title');
+            const messageEl = document.getElementById('popup-message');
+            const content = document.querySelector('.popup-content');
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            content.classList.remove('error', 'success');
+            content.classList.add(type);
+            popup.style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        // Toggle visibility sandi
+        function togglePasswordVisibility(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            const img = iconElement.querySelector('img');
+
+            if (input.type === "password") {
+                input.type = "text";
+                img.src = "../../assets/show.png"; // Ganti ke ikon mata terbuka
+            } else {
+                input.type = "password";
+                img.src = "../../assets/hide.png"; // Ganti ke ikon mata tertutup
+            }
+        }
+
+        // Validasi form sebelum submit
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!email) return showPopup('Kesalahan!', 'Email wajib diisi.');
+            if (!password) return showPopup('Kesalahan!', 'Sandi wajib diisi.');
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return showPopup('Kesalahan!', 'Format email tidak valid.');
+            }
+
+            // ✅ Validasi panjang sandi
+            if (password.length < 8) {
+                return showPopup('Kesalahan!', 'Sandi minimal 8 karakter.');
+            }
+            if (password.length > 50) {
+                return showPopup('Kesalahan!', 'Sandi maksimal 50 karakter.');
+            }
+
+            // ✅ Validasi karakter spesial — HANYA BOLEH HURUF, ANGKA, DAN SPASI
+            if (!/^[a-zA-Z0-9\s]+$/.test(password)) {
+                return showPopup('Kesalahan!', 'Sandi tidak boleh mengandung karakter spesial. Hanya boleh huruf, angka, dan spasi.');
+            }
+
+            this.submit();
+        });
+
+        // Tambahkan fungsi tombol Enter
+        document.getElementById('loginForm').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+
+                if (!email) return showPopup('Kesalahan!', 'Email wajib diisi.');
+                if (!password) return showPopup('Kesalahan!', 'Sandi wajib diisi.');
+
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    return showPopup('Kesalahan!', 'Format email tidak valid.');
+                }
+
+                if (password.length < 8) {
+                    return showPopup('Kesalahan!', 'Sandi minimal 8 karakter.');
+                }
+                if (password.length > 50) {
+                    return showPopup('Kesalahan!', 'Sandi maksimal 50 karakter.');
+                }
+
+                if (!/^[a-zA-Z0-9\s]+$/.test(password)) {
+                    return showPopup('Kesalahan!', 'Sandi tidak boleh mengandung karakter spesial. Hanya boleh huruf, angka, dan spasi.');
+                }
+
+                this.submit();
+            }
+        });
+
+        // Tampilkan error dari PHP (jika ada) sebagai popup
+        <?php if (!empty($error)): ?>
+            showPopup('Gagal Login!', '<?= addslashes(htmlspecialchars($error, ENT_QUOTES, 'UTF-8')) ?>', 'error');
+        <?php endif; ?>
     </script>
 </body>
 
