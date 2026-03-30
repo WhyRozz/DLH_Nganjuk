@@ -396,43 +396,21 @@ require_once '../KoneksiDatabase/koneksi.php';
             background: #c82333;
         }
 
-        .btn-footer {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
+        .btn-add {
+            background: #2e8b57; color: white; padding: 10px 20px;
+            border: none; border-radius: 6px; cursor: pointer;
+            font-weight: bold; font-size: 14px; margin-top: 20px;
+            display: inline-flex; align-items: center; gap: 8px;
             transition: background 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
+        .btn-add:hover { background: #226b42; }
 
-        .btn-back {
-            background: #6c757d;
-            color: white;
-            margin-right: 10px;
-        }
-
-        .btn-back:hover {
-            background: #5a6268;
-        }
-
-        .btn-create {
-            background: #2e8b57;
-            color: white;
-        }
-
-        .btn-create:hover {
-            background: #226b42;
-        }
-
-        .footer-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
+        .header-artikel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
 
         /* === POPUP KONFIRMASI HAPUS === */
         .popup-overlay {
@@ -591,7 +569,12 @@ require_once '../KoneksiDatabase/koneksi.php';
         </div>
 
         <div class="table-container">
-            <div class="table-title">Daftar Informasi TPS</div>
+            <div class="header-artikel">
+                <div class="table-title">Daftar Informasi TPS</div>
+                    <a href="form-tps.php" class="btn-add">
+                        <span>➕</span> BUAT INFO TPS
+                    </a>
+                </div>
             <table>
                 <thead>
                     <tr>
@@ -642,12 +625,6 @@ require_once '../KoneksiDatabase/koneksi.php';
                     ?>
                 </tbody>
             </table>
-
-            <div class="footer-buttons">
-                <a href="form-tps.php" class="btn-footer btn-create">
-                    <span>➕</span> BUAT INFO TPS
-                </a>
-            </div>
         </div>
     </div>
 
