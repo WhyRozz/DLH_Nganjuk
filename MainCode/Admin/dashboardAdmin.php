@@ -124,7 +124,7 @@ if (empty($tahun_options)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIMPELSI</title>
-    <link rel="shortcut icon" href="../../assets/logo.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="../../assets/logo_simpelsi.png" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -787,8 +787,9 @@ if (empty($tahun_options)) {
             </div>
         </div>
         <button class="header-desktop-exit" id="logoutBtn">
-            <span>←</span> KELUAR
-        </button>
+    <img src="../../assets/icon_keluar.png" alt="Logout Icon" style="width: 20px; height: 20px;">
+    KELUAR
+</button>
     </div>
 
     <!-- Sidebar Desktop (Tampil di Laptop/PC) -->
@@ -836,7 +837,8 @@ if (empty($tahun_options)) {
             </div>
             <div>BERANDA</div>
         </div>
-        <button class="navbar-mobile-exit" id="logoutBtnMobile">←</button>
+        <button class="header-desktop-exit" id="logoutBtnMobile">
+        <img src="/WEB/assets/keluar.png" alt="Logout Icon" style="width: 20px; height: 20px;">
     </div>
 
     <!-- Dropdown Mobile Sidebar (Tampil di HP saat tombol diklik) -->
