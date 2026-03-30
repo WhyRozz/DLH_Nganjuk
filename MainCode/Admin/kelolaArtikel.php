@@ -51,6 +51,12 @@ $artikelList = $stmt->fetchAll();
     <title>Daftar Artikel - SIMPELSI</title>
     <link rel="shortcut icon" href="../../assets/logo_simpelsi.png" type="image/x-icon">
     <style>
+        .header-artikel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
         /* --- Gaya Umum --- */
         * {
             margin: 0;
@@ -701,6 +707,7 @@ $artikelList = $stmt->fetchAll();
 
         <div class="table-container">
             <div class="table-title">Daftar Artikel Edukasi</div>
+    <a href="form-artikel.php" class="btn-add">➕ Tambah Artikel</a>
 
             <table>
                 <thead>
@@ -739,8 +746,7 @@ $artikelList = $stmt->fetchAll();
                 </tbody>
             </table>
 
-            <a href="form-artikel.php" class="btn-add">
-                <span>➕</span> TAMBAH ARTIKEL
+            
             </a>
         </div>
     </div>
