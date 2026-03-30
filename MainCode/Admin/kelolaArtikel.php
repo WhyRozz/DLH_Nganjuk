@@ -513,7 +513,7 @@ $artikelList = $stmt->fetchAll();
             <li>
                 <a href="kelolaAkun.php" class="menu-item">
                     <div class="menu-icon">🔐</div>
-                    <div>Kelola Akun</div>
+                    <div>Kelola Akun</div>  
                 </a>
             </li>
         </ul>
@@ -581,7 +581,7 @@ $artikelList = $stmt->fetchAll();
                 <button class="popup-btn confirm" onclick="hapusArtikel()">Ya, Hapus</button>
             </div>
         </div>
-    </div>
+    </div> 
 
     <!-- Popup Notifikasi (Sukses/Error dari GET) -->
     <div id="notificationPopup" class="popup-overlay">
