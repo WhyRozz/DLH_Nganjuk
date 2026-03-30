@@ -744,7 +744,7 @@ require_once '../KoneksiDatabase/koneksi.php';
                 } else if (type === 'edit') {
                     message = 'Data TPS berhasil diperbarui.';
                 }
-                showSuccessPopup(message);
+                showSuccessPopup(message);  
                 // Hapus parameter dari URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
