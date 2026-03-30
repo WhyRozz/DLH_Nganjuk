@@ -48,13 +48,8 @@ $artikelList = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Artikel - SIMPELSI</title>
+    <link rel="shortcut icon" href="../../assets/logo_simpelsi.png" type="image/x-icon">
     <style>
-            .header-artikel {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
         /* --- Gaya Umum --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -343,19 +338,94 @@ $artikelList = $stmt->fetchAll();
                 display: none;
             }
         }
+
+        /* === POPUP KONFIRMASI HAPUS === */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none; /* Sembunyikan secara default */
+            pointer-events: none; /* Agar bisa klik ke elemen di belakang jika overlay tidak aktif */
+        }
+        .popup-overlay.active {
+            display: flex;
+            pointer-events: auto; /* Aktifkan saat ditampilkan */
+        }
+        .popup-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .popup-content.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .popup-content h3 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            color: #333;
+        }
+        .popup-content p {
+            margin: 0 0 20px 0;
+            color: #555;
+            font-size: 15px;
+        }
+        .popup-btns {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .popup-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .popup-btn.cancel {
+            background: #6c757d;
+            color: white;
+        }
+        .popup-btn.cancel:hover {
+            background: #5a6268;
+        }
+        .popup-btn.confirm {
+            background: #dc3545;
+            color: white;
+        }
+        .popup-btn.confirm:hover {
+            background: #c82333;
+        }
+
+        /* === POPUP NOTIFIKASI (SUCCESS/ERROR) === */
+        .popup-content.success { border-left: 5px solid #28a745; }
+        .popup-content.error { border-left: 5px solid #dc3545; }
+
     </style>
 </head>
 <body class="fade-in">
-
-<?php if (isset($_GET['pesan'])): ?>
-<script>alert("<?= htmlspecialchars(urldecode($_GET['pesan'])) ?>");</script>
-<?php endif; ?>
 
     <!-- Header Desktop -->
     <div class="header-desktop">
         <div class="header-desktop-title">
             <div class="header-desktop-logo">
-                <img src="http://simpelsi.medianewsonline.com/WEB/assets/logo.jpg" alt="Logo SIMPELSI" class="logo-img">
+                <img src="../../assets/logo.jpg" alt="Logo SIMPELSI" class="logo-img">
             </div>
             <div>
                 <div style="font-size: 18px; font-weight: bold;">Beranda</div>
@@ -406,7 +476,7 @@ $artikelList = $stmt->fetchAll();
         <button class="navbar-mobile-menu-btn" id="menuToggle">☰</button>
         <div class="navbar-mobile-title">
             <div class="logo">
-                <img src="http://simpelsi.medianewsonline.com/WEB/assets/logo.jpg" alt="Logo SIMPELSI" class="logo-img">
+                <img src="../../assets/logo.jpg" alt="Logo SIMPELSI" class="logo-img">
             </div>
             <div>ARTIKEL</div>
         </div>
@@ -456,10 +526,7 @@ $artikelList = $stmt->fetchAll();
         </div>
 
         <div class="table-container">
-           <div class="header-artikel">
-    <div class="table-title">Daftar Artikel Edukasi</div>
-    <a href="form-artikel.php" class="btn-add">➕ Tambah Artikel</a>
-</div>
+            <div class="table-title">Daftar Artikel Edukasi</div>
 
             <table>
                 <thead>
@@ -489,7 +556,7 @@ $artikelList = $stmt->fetchAll();
                         <td>
                             <div class="action-btns">
                                 <a href="form-artikel.php?edit=<?= $artikel['id_artikel'] ?>" class="btn-action btn-edit" title="Edit">✏️</a>
-                                <a href="?hapus=<?= $artikel['id_artikel'] ?>" class="btn-action btn-delete" title="Hapus" onclick="return confirm('Yakin hapus artikel ini?')">🗑️</a>
+                                <a href="#" class="btn-action btn-delete" title="Hapus" onclick="konfirmasiHapus(<?= $artikel['id_artikel'] ?>)">🗑️</a>
                             </div>
                         </td>
                     </tr>
@@ -498,8 +565,32 @@ $artikelList = $stmt->fetchAll();
                 </tbody>
             </table>
 
-          
+            <a href="form-artikel.php" class="btn-add">
+                <span>➕</span> TAMBAH ARTIKEL
             </a>
+        </div>
+    </div>
+
+    <!-- Popup Konfirmasi Hapus -->
+    <div id="confirmPopup" class="popup-overlay">
+        <div class="popup-content">
+            <h3>Konfirmasi Hapus</h3>
+            <p>Apakah Anda yakin ingin menghapus artikel ini?</p>
+            <div class="popup-btns">
+                <button class="popup-btn cancel" onclick="closeConfirmPopup()">Batal</button>
+                <button class="popup-btn confirm" onclick="hapusArtikel()">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Notifikasi (Sukses/Error dari GET) -->
+    <div id="notificationPopup" class="popup-overlay">
+        <div class="popup-content">
+            <h3 id="notificationTitle">Notifikasi</h3>
+            <p id="notificationMessage"></p>
+            <div style="margin-top: 15px;">
+                <button class="popup-btn" onclick="closeNotificationPopup()">Tutup</button>
+            </div>
         </div>
     </div>
 
@@ -542,7 +633,86 @@ $artikelList = $stmt->fetchAll();
                 }, 200);
             });
         });
+
+        // Cek apakah ada pesan GET untuk ditampilkan
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('pesan')) {
+            const pesan = decodeURIComponent(urlParams.get('pesan'));
+            showNotification(pesan, 'success');
+            // Hapus parameter 'pesan' dari URL agar tidak muncul lagi saat refresh
+            const newUrl = window.location.origin + window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+        }
     });
+
+    // Variabel untuk menyimpan ID yang akan dihapus
+    let idYangAkanDihapus = null;
+
+    // Fungsi untuk menampilkan popup konfirmasi
+    function konfirmasiHapus(id) {
+        idYangAkanDihapus = id;
+        const popup = document.getElementById('confirmPopup');
+        popup.classList.add('active'); // Tampilkan overlay
+        // Tunggu sebentar agar transisi CSS bisa dijalankan
+        setTimeout(() => {
+            popup.querySelector('.popup-content').classList.add('show'); // Tampilkan konten
+        }, 10);
+    }
+
+    // Fungsi untuk menutup popup konfirmasi
+    function closeConfirmPopup() {
+        const popup = document.getElementById('confirmPopup');
+        popup.querySelector('.popup-content').classList.remove('show'); // Sembunyikan konten
+        // Tunggu transisi selesai sebelum menyembunyikan overlay
+        setTimeout(() => {
+            popup.classList.remove('active'); // Sembunyikan overlay
+        }, 300);
+        idYangAkanDihapus = null; // Reset ID
+    }
+
+    // Fungsi hapus Artikel (dipanggil oleh tombol "Ya, Hapus")
+    function hapusArtikel() {
+        if (idYangAkanDihapus === null) {
+            // Ini seharusnya tidak terjadi jika tombol hanya bisa diklik setelah popup muncul
+            console.error("Tidak ada ID yang dipilih untuk dihapus.");
+            closeConfirmPopup();
+            return;
+        }
+
+        // Arahkan ke URL hapus yang lama
+        window.location.href = '?hapus=' + idYangAkanDihapus;
+    }
+
+    // Fungsi untuk menampilkan popup notifikasi
+    function showNotification(message, type = 'error') {
+        const popup = document.getElementById('notificationPopup');
+        const titleElement = document.getElementById('notificationTitle');
+        const messageElement = document.getElementById('notificationMessage');
+
+        // Atur judul dan pesan
+        titleElement.textContent = type === 'success' ? 'Berhasil!' : 'Gagal!';
+        messageElement.textContent = message;
+
+        // Atur kelas CSS untuk styling (sukses/error)
+        const content = popup.querySelector('.popup-content');
+        content.className = 'popup-content ' + type; // Tambahkan kelas 'success' atau 'error'
+
+        // Tampilkan popup
+        popup.classList.add('active');
+        setTimeout(() => {
+            popup.querySelector('.popup-content').classList.add('show');
+        }, 10);
+    }
+
+    // Fungsi untuk menutup popup notifikasi
+    function closeNotificationPopup() {
+        const popup = document.getElementById('notificationPopup');
+        popup.querySelector('.popup-content').classList.remove('show');
+        setTimeout(() => {
+            popup.classList.remove('active');
+        }, 300);
+    }
+
 </script>
 </body>
 </html>
